@@ -1,0 +1,8 @@
+// #ifndef FILE_READER_H
+// #define FILE_READER_H
+
+// #include"stock_data.h"
+
+// void read_stock_data(stock_data *stock_data_arr, char sid_path[], int arr_max_len);
+
+// #endif

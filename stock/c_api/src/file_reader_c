@@ -1,0 +1,90 @@
+// #include "file_reader.h"
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <assert.h>
+
+// void read_stock_data(stock_data *stock_data_arr, char sid_path[], int arr_max_len)
+// {
+//     // read all to buf
+//     FILE *sid_fptr = fopen(sid_path, "r");
+//     if (sid_fptr == NULL)
+//     {
+//         printf("Error open %s\n", sid_path);
+//         return;
+//     }
+
+//     //get file size
+//     fseek(sid_fptr, 0, SEEK_END);
+//     long buf_size = ftell(sid_fptr) + 1;
+//     fseek(sid_fptr, 0, SEEK_SET);
+
+//     char *buf = malloc(buf_size);
+
+//     fgets(buf, buf_size, sid_fptr);
+
+//     fclose(sid_fptr);
+
+//     // parse and set
+//     const int DATA_LEN = STOCK_ID_LEN + FORMATTED_DATE_LEN + 1;
+//     char tmp[DATA_LEN];
+//     int stock_id;
+//     int ipo_date;
+//     for (int i = 0, j = 0; i < buf_size; i += DATA_LEN + 1, j++)
+//     {
+//         memcpy(tmp, &buf[i], DATA_LEN);
+//         sscanf(tmp, "%d,%d", &stock_id, &ipo_date);
+
+//         assert(j < arr_max_len);
+
+//         stock_data_arr[j] = new_stock_data(stock_id, ipo_date);
+//     }
+
+//     free(buf_size);
+// }
+
+// void read_trade_day_info(stock_data *stock_data_ptr, char smd_root_path[], int days)
+// {
+//     if (stock_data_ptr->trade_day_info_list.list_len != 0)
+//     {
+//         printf("Need to finish dllist destructor\n");
+//         assert(0);
+//     }
+
+//     char smd_path[sizeof(smd_root_path) + 32];
+//     sprintf(smd_path, "%s/%d.smd",smd_root_path, stock_data_ptr->stock_id);
+
+//     // read all to buf
+//     FILE *smd_fptr = fopen(smd_path, "r");
+//     if (sid_fptr == NULL)
+//     {
+//         printf("Error open %s\n", sid_path);
+//         return;
+//     }
+
+//     //get file size
+//     fseek(sid_fptr, 0, SEEK_END);
+//     long buf_size = ftell(sid_fptr) + 1;
+//     fseek(sid_fptr, 0, SEEK_SET);
+
+//     char *buf = malloc(buf_size);
+
+//     fgets(buf, buf_size, sid_fptr);
+
+//     fclose(sid_fptr);
+
+//     // parse and set
+//     const int DATA_LEN = STOCK_ID_LEN + FORMATTED_DATE_LEN + 1;
+//     char tmp[DATA_LEN];
+//     int stock_id;
+//     int ipo_date;
+//     for (int i = 0, j = 0; i < buf_size; i += DATA_LEN + 1, j++)
+//     {
+//         memcpy(tmp, &buf[i], DATA_LEN);
+//         sscanf(tmp, "%d,%d", &stock_id, &ipo_date);
+
+//         assert(j < arr_max_len);
+
+//         stock_data_arr[j] = new_stock_data(stock_id, ipo_date);
+//     }
+// }
