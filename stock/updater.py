@@ -62,7 +62,6 @@ def update_smd(smd_path, stock_id, months):
     now = datetime.datetime.now()
     cur_month = now.month
     cur_year = now.year
-    opt_dict = {}
     for i in range(months):
         if cur_month == 0:
             cur_month = 12
@@ -77,13 +76,16 @@ def update_smd(smd_path, stock_id, months):
         if content is None:
             logger.logp("cannot get data: {} {} {}".format(cur_year, cur_month, stock_id))
         else:
-            opt_dict[key] = content
+            exist_dict[key] = content
 
         cur_month -= 1
 
-    smd_file = open(smd_path, 'w', encoding="UTF-8")
-    smd_file.write(json.dumps(opt_dict))
-    smd_file.close()
+    smd_tmp_path = "{}.tmp".format(smd_path)
+    smd_tmp_file = open(smd_tmp_path, 'w', encoding="UTF-8")
+    smd_tmp_file.write(json.dumps(exist_dict))
+    smd_tmp_file.close()
+
+    os.replace(smd_tmp_path, smd_path)
 
 
 def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag):

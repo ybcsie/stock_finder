@@ -11,3 +11,6 @@ def init_work_arr(stock_data_cptr_list):
 
     return stock_arr_cptr
 
+
+def del_work_arr(stock_arr_cptr):
+    stock.del_stock_data_arr(stock_arr_cptr)

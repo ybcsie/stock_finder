@@ -8,7 +8,7 @@ import datetime
 logger = msgopt.Logger("reader")
 
 
-def read_stock_data_cptr_list(sid_path):
+def read_stock_data_cptr_list(sid_path, trade_day_size):
     if not os.path.exists(sid_path):
         raise RuntimeError("{} not exist".format(sid_path))
 
@@ -19,7 +19,9 @@ def read_stock_data_cptr_list(sid_path):
     for i in range(len(stock_data_cptr_list)):
         stock_info = stock_data_cptr_list[i].split(',')
         if len(stock_info) == 2:
-            stock_data_cptr_list[i] = stock.new_stock_data_ptr(int(stock_info[0]), tools.date2int(stock_info[1]))
+            stock_data_cptr_list[i] = stock.new_stock_data_ptr(int(stock_info[0]),
+                                                               tools.date2int(stock_info[1]),
+                                                               trade_day_size)
         else:
             print("Error: stock list -- {}".format(stock_data_cptr_list[i]))
 
