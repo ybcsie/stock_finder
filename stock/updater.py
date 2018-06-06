@@ -88,13 +88,39 @@ def update_smd(smd_path, stock_id, months):
     os.replace(smd_tmp_path, smd_path)
 
 
-def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag):
-    for stock_data_cptr in stock_data_cptr_list:
-        stock_id = stock.get_stock_id(stock_data_cptr)
-        smd_path = "{}/{}.smd".format(smd_dir, stock_id)
+def require_update(update_log_path):
+    if not os.path.exists(update_log_path):
+        return True
 
-        logger.logp("update {}".format(stock_id))
-        update_smd(smd_path, stock_id, months)
+    log_file = open(update_log_path, 'r', encoding="UTF-8")
+    last_datetime = datetime.datetime.strptime(log_file.read(), "%Y/%m/%d/%H")
+    log_file.close()
+    now = datetime.datetime.now()
+
+    update_datetime = datetime.datetime.strptime("{}/{}/{}/15".format(now.year, now.month, now.day), "%Y/%m/%d/%H")
+    if now.hour < 15:
+        update_datetime -= datetime.timedelta(days=1)
+
+    if last_datetime >= update_datetime:
+        return False
+
+    return True
+
+
+def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, force_update=False):
+    update_log_path = smd_dir + "/update.log"
+
+    if require_update(update_log_path) or force_update:
+        for stock_data_cptr in stock_data_cptr_list:
+            stock_id = stock.get_stock_id(stock_data_cptr)
+            smd_path = "{}/{}.smd".format(smd_dir, stock_id)
+
+            logger.logp("update {}".format(stock_id))
+            update_smd(smd_path, stock_id, months)
+
+    update_log_file = open(update_log_path, 'w')
+    update_log_file.write(datetime.datetime.now().strftime("%Y/%m/%d/%H"))
+    update_log_file.close()
 
     finish_flag[0] = True
 

@@ -26,10 +26,6 @@ def worker(display_func):
         work_arr = stock.init_work_arr(listed_list)
 
         while True:
-            # debug
-            break
-            # end debug
-
             stock.livedata.get_livedata(listed_list)
 
             logger.logp("worker : start")
