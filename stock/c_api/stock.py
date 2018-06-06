@@ -100,8 +100,12 @@ def new_stock_data_arr_ptr(size):
     return _stock.new_stock_data_arr_ptr(size)
 new_stock_data_arr_ptr = _stock.new_stock_data_arr_ptr
 
-def new_stock_data_ptr(stock_id, ipo_date):
-    return _stock.new_stock_data_ptr(stock_id, ipo_date)
+def del_stock_data_arr(stock_data_arr_ptr):
+    return _stock.del_stock_data_arr(stock_data_arr_ptr)
+del_stock_data_arr = _stock.del_stock_data_arr
+
+def new_stock_data_ptr(stock_id, ipo_date, trade_day_info_size):
+    return _stock.new_stock_data_ptr(stock_id, ipo_date, trade_day_info_size)
 new_stock_data_ptr = _stock.new_stock_data_ptr
 
 def get_stock_id(stock_data_ptr):

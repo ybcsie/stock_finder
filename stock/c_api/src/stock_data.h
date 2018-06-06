@@ -5,12 +5,8 @@
 #define DATE_LEN 8
 #define FORMATTED_DATE_LEN DATE_LEN + 2
 
-typedef struct trade_day_info trade_day_info;
-struct trade_day_info
+typedef struct
 {
-	trade_day_info *prev_ptr;
-	trade_day_info *next_ptr;
-
 	int date; //20180101
 	float vol;
 	float first;
@@ -18,21 +14,22 @@ struct trade_day_info
 	float lowest;
 	float last;
 	float delta;
-};
+
+} trade_day_info;
 
 typedef struct
 {
-	trade_day_info *head_ptr;
-	trade_day_info *tail_ptr;
-	int list_len;
+	trade_day_info **ptr_arr;
+	int *cur_len_ptr;
+	int size;
 
-} trade_day_info_dllist;
+} trade_day_info_arr;
 
 typedef struct
 {
 	int stock_id;
 	int ipo_date; //20180101
-	trade_day_info_dllist *trade_day_info_list_ptr;
+	trade_day_info_arr *trade_day_info_arr_ptr;
 
 } stock_data;
 
@@ -44,14 +41,15 @@ typedef struct
 
 } stock_data_arr;
 
-trade_day_info_dllist *new_trade_day_info_dllist_ptr();
+trade_day_info_arr *new_trade_day_info_arr_ptr(const int size);
+void del_trade_day_info_arr(trade_day_info_arr *trade_day_info_arr_ptr);
 
-void add_trade_day_info_new_node(stock_data *stock_data_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta);
-void update_trade_day_info_last_node(stock_data *stock_data_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta);
+void add_trade_day_info_new_item(trade_day_info_arr *trade_day_info_arr_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta);
+void update_trade_day_info_last_item(trade_day_info_arr *trade_day_info_arr_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta);
 
-int is_new_high(trade_day_info *trade_day_info_ptr, int days_range);
-int is_jump(trade_day_info *trade_day_info_ptr);
-int has_gap(trade_day_info *trade_day_info_ptr);
-int is_attack(trade_day_info *trade_day_info_ptr, int days_range);
+int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range);
+int is_jump(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
+int has_gap(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
+int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range);
 
 #endif

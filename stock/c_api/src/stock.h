@@ -8,7 +8,9 @@ extern const int WORK_TYPE_NEWHIGH;
 extern const int WORK_TYPE_ATTACK;
 
 stock_data_arr *new_stock_data_arr_ptr(const int size);
-stock_data *new_stock_data_ptr(const int stock_id, const int ipo_date);
+void del_stock_data_arr(stock_data_arr *stock_data_arr_ptr);
+
+stock_data *new_stock_data_ptr(const int stock_id, const int ipo_date, const int trade_day_info_size);
 
 int get_stock_id(stock_data *stock_data_ptr);
 

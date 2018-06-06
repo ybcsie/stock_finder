@@ -3282,19 +3282,44 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_del_stock_data_arr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  stock_data_arr *arg1 = (stock_data_arr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:del_stock_data_arr",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_stock_data_arr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "del_stock_data_arr" "', argument " "1"" of type '" "stock_data_arr *""'"); 
+  }
+  arg1 = (stock_data_arr *)(argp1);
+  del_stock_data_arr(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_stock_data_ptr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int arg2 ;
+  int arg3 ;
   int val1 ;
   int ecode1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
   stock_data *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:new_stock_data_ptr",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOO:new_stock_data_ptr",&obj0,&obj1,&obj2)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_stock_data_ptr" "', argument " "1"" of type '" "int""'");
@@ -3305,7 +3330,12 @@ SWIGINTERN PyObject *_wrap_new_stock_data_ptr(PyObject *SWIGUNUSEDPARM(self), Py
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_stock_data_ptr" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = (int)(val2);
-  result = (stock_data *)new_stock_data_ptr(arg1,arg2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_stock_data_ptr" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  result = (stock_data *)new_stock_data_ptr(arg1,arg2,arg3);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_stock_data, 0 |  0 );
   return resultobj;
 fail:
@@ -3483,6 +3513,7 @@ fail:
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"new_stock_data_arr_ptr", _wrap_new_stock_data_arr_ptr, METH_VARARGS, NULL},
+	 { (char *)"del_stock_data_arr", _wrap_del_stock_data_arr, METH_VARARGS, NULL},
 	 { (char *)"new_stock_data_ptr", _wrap_new_stock_data_ptr, METH_VARARGS, NULL},
 	 { (char *)"get_stock_id", _wrap_get_stock_id, METH_VARARGS, NULL},
 	 { (char *)"add_stock_data", _wrap_add_stock_data, METH_VARARGS, NULL},

@@ -5,24 +5,34 @@
 #include <string.h>
 #include <assert.h>
 
-trade_day_info_dllist *new_trade_day_info_dllist_ptr()
+trade_day_info_arr *new_trade_day_info_arr_ptr(const int size)
 {
-	trade_day_info_dllist *new_ptr = malloc(sizeof(trade_day_info_dllist));
-	new_ptr->head_ptr = NULL;
-	new_ptr->tail_ptr = NULL;
-	new_ptr->list_len = 0;
+	trade_day_info_arr *new_ptr = malloc(sizeof(trade_day_info_arr));
+	new_ptr->ptr_arr = malloc(sizeof(trade_day_info *) * size);
+	new_ptr->cur_len_ptr = malloc(sizeof(int));
+	new_ptr->size = size;
+
+	*(new_ptr->cur_len_ptr) = 0;
 
 	return new_ptr;
 }
 
-void add_trade_day_info_new_node(stock_data *stock_data_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta)
+void del_trade_day_info_arr(trade_day_info_arr *trade_day_info_arr_ptr)
 {
-	trade_day_info_dllist *list_ptr = stock_data_ptr->trade_day_info_list_ptr;
+	for (int i = 0; i < *(trade_day_info_arr_ptr->cur_len_ptr) - 1; i++)
+		free(trade_day_info_arr_ptr->ptr_arr[i]);
+
+	free(trade_day_info_arr_ptr->ptr_arr);
+	free(trade_day_info_arr_ptr->cur_len_ptr);
+	free(trade_day_info_arr_ptr);
+}
+
+void add_trade_day_info_new_item(trade_day_info_arr *trade_day_info_arr_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta)
+{
+	assert(*(trade_day_info_arr_ptr->cur_len_ptr) < trade_day_info_arr_ptr->size);
+	*(trade_day_info_arr_ptr->cur_len_ptr) += 1;
 
 	trade_day_info *new_trade_day_info_ptr = malloc(sizeof(trade_day_info));
-
-	new_trade_day_info_ptr->prev_ptr = list_ptr->tail_ptr;
-	new_trade_day_info_ptr->next_ptr = NULL;
 
 	new_trade_day_info_ptr->date = date;
 	new_trade_day_info_ptr->vol = vol;
@@ -32,110 +42,95 @@ void add_trade_day_info_new_node(stock_data *stock_data_ptr, int date, float vol
 	new_trade_day_info_ptr->last = last;
 	new_trade_day_info_ptr->delta = delta;
 
-	// modify list info
-	if (list_ptr->list_len > 0)
-	{
-		assert(list_ptr->head_ptr != NULL && list_ptr->tail_ptr != NULL);
-		list_ptr->tail_ptr->next_ptr = new_trade_day_info_ptr;
-	}
-	else
-	{
-		assert(list_ptr->list_len == 0);
-		list_ptr->head_ptr = new_trade_day_info_ptr;
-	}
-
-	list_ptr->tail_ptr = new_trade_day_info_ptr;
-	list_ptr->list_len += 1;
+	trade_day_info_arr_ptr->ptr_arr[*(trade_day_info_arr_ptr->cur_len_ptr) - 1] = new_trade_day_info_ptr;
 }
 
-void update_trade_day_info_last_node(stock_data *stock_data_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta)
+void update_trade_day_info_last_item(trade_day_info_arr *trade_day_info_arr_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta)
 {
-	trade_day_info_dllist *list_ptr = stock_data_ptr->trade_day_info_list_ptr;
+	trade_day_info *last_item_ptr = trade_day_info_arr_ptr->ptr_arr[*(trade_day_info_arr_ptr->cur_len_ptr) - 1];
 
 	// check empty
-	assert(list_ptr->list_len > 0);
-	assert(list_ptr->head_ptr != NULL && list_ptr->tail_ptr != NULL);
+	assert(*(trade_day_info_arr_ptr->cur_len_ptr) > 0);
 
 	// check date
-	assert(date == list_ptr->tail_ptr->date);
+	assert(date == last_item_ptr->date);
 
 	// replace last
-	list_ptr->tail_ptr->date = date;
-	list_ptr->tail_ptr->vol = vol;
-	list_ptr->tail_ptr->first = first;
-	list_ptr->tail_ptr->highest = highest;
-	list_ptr->tail_ptr->lowest = lowest;
-	list_ptr->tail_ptr->last = last;
-	list_ptr->tail_ptr->delta = delta;
+	last_item_ptr->vol = vol;
+	last_item_ptr->first = first;
+	last_item_ptr->highest = highest;
+	last_item_ptr->lowest = lowest;
+	last_item_ptr->last = last;
+	last_item_ptr->delta = delta;
 }
 
-trade_day_info *find_highest_ptr(trade_day_info *trade_day_info_ptr, int earliest_date)
+int find_highest_idx(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int earliest_date)
 {
-	trade_day_info *highest_ptr = trade_day_info_ptr;
-	trade_day_info *cur_ptr = trade_day_info_ptr->prev_ptr;
-	while (cur_ptr != NULL)
+	int highest_idx = trade_day_info_idx;
+
+	for (int i = trade_day_info_idx - 1; i >= 0; i--)
 	{
 		// is date in bound?
-		if (cur_ptr->date >= earliest_date)
+		if (trade_day_info_ptr_arr[i]->date >= earliest_date)
 		{
-			if (cur_ptr->highest > highest_ptr->highest)
-				highest_ptr = cur_ptr;
+			if (trade_day_info_ptr_arr[i]->highest > trade_day_info_ptr_arr[highest_idx]->highest)
+				highest_idx = i;
 		}
 		else
 			break;
-
-		cur_ptr = cur_ptr->prev_ptr;
 	}
 
-	return highest_ptr;
+	return highest_idx;
 }
 
-int is_new_high(trade_day_info *trade_day_info_ptr, int days_range)
+int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range)
 {
-	int earliest_date = get_date_by_delta(trade_day_info_ptr->date, days_range);
+	int earliest_date = get_date_by_delta(trade_day_info_ptr_arr[trade_day_info_idx]->date, days_range);
 
-	trade_day_info *highest_ptr = find_highest_ptr(trade_day_info_ptr, earliest_date);
+	int highest_idx = find_highest_idx(trade_day_info_ptr_arr, trade_day_info_idx, earliest_date);
 
-	if (highest_ptr == NULL)
-		return 0; //false
+	assert(highest_idx >= 0);
 
-	if (highest_ptr == trade_day_info_ptr)
+	if (highest_idx == trade_day_info_idx)
 		return 1; //true
 
 	return 0; //false
 }
 
-int is_jump(trade_day_info *trade_day_info_ptr)
+int is_jump(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 {
-	if (trade_day_info_ptr->prev_ptr == NULL)
+	// check is first?
+	if (trade_day_info_idx == 0)
 		return 0; //false
 
-	if (trade_day_info_ptr->first > trade_day_info_ptr->prev_ptr->highest)
+	if (trade_day_info_ptr_arr[trade_day_info_idx]->first > trade_day_info_ptr_arr[trade_day_info_idx - 1]->highest)
 		return 1; //true
 
 	return 0; //false
 }
 
-int has_gap(trade_day_info *trade_day_info_ptr)
+int has_gap(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 {
-	if (trade_day_info_ptr->prev_ptr == NULL)
+	// check is first?
+	if (trade_day_info_idx == 0)
 		return 0; //false
 
-	if (trade_day_info_ptr->lowest > trade_day_info_ptr->prev_ptr->highest)
+	if (trade_day_info_ptr_arr[trade_day_info_idx]->lowest > trade_day_info_ptr_arr[trade_day_info_idx - 1]->highest)
 		return 1; //true
 
 	return 0; //false
 }
 
-int is_attack(trade_day_info *trade_day_info_ptr, int days_range)
+int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range)
 {
-	if (trade_day_info_ptr->prev_ptr == NULL)
+	// check is first?
+	if (trade_day_info_idx == 0)
 		return 0; //false
 
-	if (!is_new_high(trade_day_info_ptr->prev_ptr, days_range))
+	if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1, days_range))
 		return 0; //false
 
-	if (has_gap(trade_day_info_ptr))
+	if (has_gap(trade_day_info_ptr_arr, trade_day_info_idx))
 		return 1; //true
 
 	return 0; //false
