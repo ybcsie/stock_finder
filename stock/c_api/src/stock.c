@@ -72,11 +72,11 @@ void add_trade_day_info(stock_data *stock_data_ptr, int date, float vol, float f
 	add_trade_day_info_new_item(arr_ptr, date, vol, first, highest, lowest, last, delta);
 }
 
-static int (*work_funcs[])(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range) = {is_new_high, is_attack};
+static int (*work_funcs[])(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min) = {is_new_high, is_attack};
 const int WORK_TYPE_NEWHIGH = 0;
 const int WORK_TYPE_ATTACK = 1;
 
-PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
+PyObject *work(stock_data_arr *work_arr_ptr, const int work_type, const int days_range, const int delta_percentage_min)
 {
 	PyObject *opt_PyList = PyList_New(0);
 
@@ -84,7 +84,7 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
 	{
 		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
-		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, *(trade_day_info_arr_ptr->cur_len_ptr) - 1, 150))
+		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, *(trade_day_info_arr_ptr->cur_len_ptr) - 1, days_range, delta_percentage_min))
 			PyList_Append(opt_PyList, PyLong_FromLong(work_arr_ptr->ptr_arr[i]->stock_id));
 	}
 

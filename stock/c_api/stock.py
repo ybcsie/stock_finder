@@ -120,8 +120,8 @@ def add_trade_day_info(stock_data_ptr, date, vol, first, highest, lowest, last, 
     return _stock.add_trade_day_info(stock_data_ptr, date, vol, first, highest, lowest, last, delta)
 add_trade_day_info = _stock.add_trade_day_info
 
-def work(work_arr_ptr, work_type):
-    return _stock.work(work_arr_ptr, work_type)
+def work(work_arr_ptr, work_type, days_range, delta_percentage_min):
+    return _stock.work(work_arr_ptr, work_type, days_range, delta_percentage_min)
 work = _stock.work
 # This file is compatible with both classic and new-style classes.
 

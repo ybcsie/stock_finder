@@ -2,15 +2,15 @@ from .c_api import stock
 import datetime
 
 
-def get_new_high(work_arr_cptr):
-    opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_NEWHIGH)
+def get_new_high(work_arr_cptr, days_range, delta_percentage_min):
+    opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_NEWHIGH, days_range, delta_percentage_min)
 
     return opt_list
 
 
-def get_attack(work_arr_cptr):
+def get_attack(work_arr_cptr, days_range, delta_percentage_min):
     t1 = datetime.datetime.now()
-    opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_ATTACK)
+    opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_ATTACK, days_range, delta_percentage_min)
     t2 = datetime.datetime.now()
 
     # print("attack: {} s".format((t2 - t1).total_seconds()))

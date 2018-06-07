@@ -99,15 +99,13 @@ int is_red_k(trade_day_info *trade_day_info_ptr)
 	return 0; //false
 }
 
-int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range)
+int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min)
 {
 	if (trade_day_info_idx == 0)
 		return 0; //false
 
 	if (!is_red_k(trade_day_info_ptr_arr[trade_day_info_idx]))
 		return 0; //false
-
-	float delta_percentage_min = 5;
 
 	if (get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) < delta_percentage_min)
 		return 0; //false
@@ -148,13 +146,13 @@ int has_gap(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 	return 0; //false
 }
 
-int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range)
+int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min)
 {
 	// check is first?
 	if (trade_day_info_idx == 0)
 		return 0; //false
 
-	if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1, days_range))
+	if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1, days_range, delta_percentage_min))
 		return 0; //false
 
 	if (has_gap(trade_day_info_ptr_arr, trade_day_info_idx))

@@ -18,6 +18,6 @@ void add_stock_data(stock_data_arr *work_arr_ptr, stock_data *stock_data_ptr);
 
 void add_trade_day_info(stock_data *stock_data_ptr, const int date, const float vol, const float first, const float highest, const float lowest, const float last, const float delta);
 
-PyObject *work(stock_data_arr *work_arr_ptr, const int work_type);
+PyObject *work(stock_data_arr *work_arr_ptr, const int work_type, const int days_range, const int delta_percentage_min);
 
 #endif
