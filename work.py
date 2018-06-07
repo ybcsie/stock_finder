@@ -51,7 +51,7 @@ def worker(display_func):
 
             logger.logp("worker : start")
 
-            op_file = open("results.tmp", 'w', encoding="UTF-8")
+            op_file = open("results/results.tmp", 'w', encoding="UTF-8")
 
             op_js = ""
             attack_list = stock.get_attack(work_arr, days_range, attack_delta_percentage_min)
@@ -94,7 +94,7 @@ def worker(display_func):
 
             op_file.write("\nvar newhigh_max = [{}];".format(op_js))
             op_file.close()
-            os.replace("results.tmp", "results.js")
+            os.replace("results/results.tmp", "results/results.js")
 
             logger.logp("worker : done")
 

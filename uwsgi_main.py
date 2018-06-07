@@ -8,17 +8,28 @@ import urllib.parse
 def application(env, start_response):
     global action_value
 
-    try:
-        query = env["QUERY_STRING"]
-    except:
-        query = ""
-    op_str = "OK <br/>{}<br/>".format(env)
-    query = urllib.parse.parse_qs(query)
-    action = int(query.get("action", [0])[0])
+    query = env.get("QUERY_STRING")
+    path_info = env.get("PATH_INFO")
+    uwsgi_location = env.get("UWSGI_LOCATION")
+    assert uwsgi_location is not None, "UWSGI_LOCATION is not defined in server setting"
 
-    action_value.value = action
+    sub_dir = path_info.split(uwsgi_location)[1]
 
-    op_str += "OK <br/><br/> {}".format(action)
+    work_dict = {"/attack": "1"}
+
+    job = work_dict.get(sub_dir)
+
+    op_str = ""
+
+    if job is None:
+        op_str = "{} is not defined".format(path_info)
+    else:
+        query = urllib.parse.parse_qs(query)
+        action = int(query.get("action", [0])[0])
+
+        action_value.value = action
+
+        op_str += "<br/><br/> {}".format(action)
 
     start_response("200 OK", [('Content-Type', 'text/html')])
     return [op_str.encode("utf-8")]

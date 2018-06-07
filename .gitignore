@@ -1,11 +1,15 @@
 *.sid
 *.o
 *.tmp
-results.js
+*.js
+
+*__pycache__
+
 .idea
 smd
 logs
+results
+
 stock/c_api/*.dll
 stock/c_api/*.so
 stock/c_api/src/swig_gen
-stock/c_api/__pycache__
