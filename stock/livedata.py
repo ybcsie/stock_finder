@@ -24,10 +24,10 @@ def get_livedata(stock_data_cptr_list):
 
     delay = 4
     connection_end_datetime = None
-    for cur_cptr_list in cptr_list_list:
+    for i, cur_cptr_list in enumerate(cptr_list_list):
+        logger.logp("get live data {} / {}".format(i + 1, len(cptr_list_list)))
         max_try = 3
         while max_try > 0:
-            # StockData.display("Connecting...")
             if connection_end_datetime is not None:
                 tools.delay_from_datetime(connection_end_datetime, delay)
             else:

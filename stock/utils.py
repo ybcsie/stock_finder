@@ -13,7 +13,7 @@ def get_attack(work_arr_cptr):
     opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_ATTACK)
     t2 = datetime.datetime.now()
 
-    print("attack: {} s".format((t2 - t1).total_seconds()))
+    # print("attack: {} s".format((t2 - t1).total_seconds()))
 
     return opt_list
 

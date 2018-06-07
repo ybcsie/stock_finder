@@ -1,5 +1,6 @@
 import stock
 import os
+import datetime
 
 
 listed_sid_path = "listed.sid"
@@ -11,6 +12,8 @@ def worker(display_func):
     logger = stock.Logger("work", display_func)
     finish_flag = [False]
     while True:
+        updated = True
+
         stock.updater.update_listed_list(listed_sid_path)
         listed_list = stock.reader.read_stock_data_cptr_list(listed_sid_path, months * 30)
 
@@ -26,42 +29,56 @@ def worker(display_func):
         work_arr = stock.init_work_arr(listed_list)
 
         while True:
-            stock.livedata.get_livedata(listed_list)
+            now = datetime.datetime.now()
 
-            logger.logp("worker : start")
+            if now.hour == 15 and not updated:
+                break
 
-            op_file = open("results.tmp", 'w', encoding="UTF-8")
+            if 8 <= now.hour < 14:
+                stock.livedata.get_livedata(listed_list)
 
-            op_js = ""
-            attack_list = stock.get_attack(work_arr)
-            if len(attack_list) > 0:
-                for stock_id in attack_list:
-                    if op_js != "":
-                        op_js += ','
+                logger.logp("worker : start")
 
-                    print(stock_id)
-                    op_js += "\"{}\"".format(stock_id)
+                op_file = open("results.tmp", 'w', encoding="UTF-8")
 
-            op_file.write("var attack = [{}];".format(op_js))
-            op_file.flush()
+                op_js = ""
+                attack_list = stock.get_attack(work_arr)
+                if len(attack_list) > 0:
+                    print("\nattack:")
+                    for stock_id in attack_list:
+                        if op_js != "":
+                            op_js += ','
 
-            op_js = ""
-            newhigh_list = stock.get_new_high(work_arr)
-            if len(newhigh_list) > 0:
-                for stock_id in newhigh_list:
-                    if op_js != "":
-                        op_js += ','
+                        print(stock_id)
+                        op_js += "\"{}\"".format(stock_id)
 
-                    print(stock_id)
-                    op_js += "\"{}\"".format(stock_id)
+                op_file.write("var attack = [{}];".format(op_js))
+                op_file.flush()
 
-            op_file.write("\nvar newhigh = [{}];".format(op_js))
-            op_file.close()
-            os.replace("results.tmp", "results.js")
+                op_js = ""
+                newhigh_list = stock.get_new_high(work_arr)
+                if len(newhigh_list) > 0:
+                    print("\nnew high:")
+                    for stock_id in newhigh_list:
+                        if op_js != "":
+                            op_js += ','
 
-            logger.logp("worker : done")
+                        print(stock_id)
+                        op_js += "\"{}\"".format(stock_id)
 
-            stock.tools.delay(5)
+                op_file.write("\nvar newhigh = [{}];".format(op_js))
+                op_file.close()
+                os.replace("results.tmp", "results.js")
+
+                logger.logp("worker : done")
+
+                stock.tools.delay(5)
+                continue
+
+            if updated:
+                updated = False
+
+            stock.tools.delay(300)
 
         stock.del_work_arr(work_arr)
 

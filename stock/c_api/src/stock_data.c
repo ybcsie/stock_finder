@@ -83,8 +83,35 @@ int find_highest_idx(trade_day_info **trade_day_info_ptr_arr, int trade_day_info
 	return highest_idx;
 }
 
+float get_delta_percentage(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
+{
+	if (trade_day_info_idx == 0)
+		return 0;
+
+	return trade_day_info_ptr_arr[trade_day_info_idx]->delta / trade_day_info_ptr_arr[trade_day_info_idx - 1]->last * 100;
+}
+
+int is_red_k(trade_day_info *trade_day_info_ptr)
+{
+	if (trade_day_info_ptr->last > trade_day_info_ptr->first)
+		return 1; //true
+
+	return 0; //false
+}
+
 int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range)
 {
+	if (trade_day_info_idx == 0)
+		return 0; //false
+
+	if (!is_red_k(trade_day_info_ptr_arr[trade_day_info_idx]))
+		return 0; //false
+
+	float delta_percentage_min = 5;
+
+	if (get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) < delta_percentage_min)
+		return 0; //false
+
 	int earliest_date = get_date_by_delta(trade_day_info_ptr_arr[trade_day_info_idx]->date, days_range);
 
 	int highest_idx = find_highest_idx(trade_day_info_ptr_arr, trade_day_info_idx, earliest_date);
