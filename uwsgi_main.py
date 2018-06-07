@@ -13,23 +13,21 @@ def application(env, start_response):
     uwsgi_location = env.get("UWSGI_LOCATION")
     assert uwsgi_location is not None, "UWSGI_LOCATION is not defined in server setting"
 
-    sub_dir = path_info.split(uwsgi_location)[1]
-
-    work_dict = {"/attack": "1"}
-
-    job = work_dict.get(sub_dir)
-
+    sub_dir = path_info.split(uwsgi_location + '/')[1]
+    work_list = ["attack", "newhigh"]
     op_str = ""
 
-    if job is None:
-        op_str = "{} is not defined".format(path_info)
+    if sub_dir not in work_list:
+        op_str = "{} is not defined".format(sub_dir)
     else:
         query = urllib.parse.parse_qs(query)
-        action = int(query.get("action", [0])[0])
+        delta_percentage_min_str = query.get("min")
+        if delta_percentage_min_str is None:
+            delta_percentage_min = None
+        else:
+            delta_percentage_min = int(delta_percentage_min_str[0])
 
-        action_value.value = action
-
-        op_str += "<br/><br/> {}".format(action)
+        op_str += work.get_js(sub_dir, delta_percentage_min)
 
     start_response("200 OK", [('Content-Type', 'text/html')])
     return [op_str.encode("utf-8")]
@@ -92,5 +90,5 @@ if __name__ == '__main__':
     pass
 
 else:
-    multiprocessing.Process(target=work.worker, args=(op,)).start()
+    threading.Thread(target=work.worker, args=(op,)).start()
 
