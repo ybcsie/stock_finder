@@ -1,13 +1,11 @@
-*.sid
 *.o
 *.tmp
 *.js
+*.log
 
 *__pycache__
 
 .idea
-smd
-logs
 results
 
 stock/c_api/*.dll

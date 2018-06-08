@@ -5,6 +5,9 @@
 #include <string.h>
 #include <assert.h>
 
+int days_range = 150;
+int delta_percentage_min = 5;
+
 trade_day_info_arr *new_trade_day_info_arr_ptr(const int size)
 {
 	trade_day_info_arr *new_ptr = malloc(sizeof(trade_day_info_arr));
@@ -91,6 +94,14 @@ float get_delta_percentage(trade_day_info **trade_day_info_ptr_arr, int trade_da
 	return trade_day_info_ptr_arr[trade_day_info_idx]->delta / trade_day_info_ptr_arr[trade_day_info_idx - 1]->last * 100;
 }
 
+int is_limup(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
+{
+	if (get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) > 9 && trade_day_info_ptr_arr[trade_day_info_idx]->last == trade_day_info_ptr_arr[trade_day_info_idx]->highest)
+		return 1; //true
+
+	return 0; //false
+}
+
 int is_red_k(trade_day_info *trade_day_info_ptr)
 {
 	if (trade_day_info_ptr->last > trade_day_info_ptr->first)
@@ -99,7 +110,7 @@ int is_red_k(trade_day_info *trade_day_info_ptr)
 	return 0; //false
 }
 
-int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min)
+int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 {
 	if (trade_day_info_idx == 0)
 		return 0; //false
@@ -146,17 +157,41 @@ int has_gap(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 	return 0; //false
 }
 
-int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min)
+int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 {
 	// check is first?
 	if (trade_day_info_idx == 0)
 		return 0; //false
 
-	if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1, days_range, delta_percentage_min))
+	if (!has_gap(trade_day_info_ptr_arr, trade_day_info_idx))
 		return 0; //false
 
-	if (has_gap(trade_day_info_ptr_arr, trade_day_info_idx))
+	if (is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 		return 1; //true
 
 	return 0; //false
+}
+
+int is_match_rule_01(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float percentage)
+{
+	// check is first?
+	if (trade_day_info_idx == 0)
+		return -1; //not target
+
+	if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
+		return -1; //not target
+
+	if (is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+		return -1; //not target
+
+	float highest = trade_day_info_ptr_arr[trade_day_info_idx]->highest;
+	float first = trade_day_info_ptr_arr[trade_day_info_idx]->first;
+
+	if (highest <= first)
+		return 0; //false
+
+	if ((highest - first) / first * 100 < percentage)
+		return 0; //false
+
+	return 1; //true
 }

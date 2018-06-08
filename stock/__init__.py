@@ -1,6 +1,5 @@
 from .c_api import stock
-from . import reader, livedata, tools, updater
-from .utils import get_new_high, get_attack
+from . import reader, livedata, tools, updater, utils
 from .msgopt import Logger
 
 

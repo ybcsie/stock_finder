@@ -72,11 +72,14 @@ void add_trade_day_info(stock_data *stock_data_ptr, int date, float vol, float f
 	add_trade_day_info_new_item(arr_ptr, date, vol, first, highest, lowest, last, delta);
 }
 
-static int (*work_funcs[])(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min) = {is_new_high, is_attack};
+void set_days_range(int value) { days_range = value; }
+void set_delta_percentage_min(float value) { delta_percentage_min = value; }
+
+static int (*work_funcs[])(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx) = {is_new_high, is_attack};
 const int WORK_TYPE_NEWHIGH = 0;
 const int WORK_TYPE_ATTACK = 1;
 
-PyObject *work(stock_data_arr *work_arr_ptr, const int work_type, const int days_range, const int delta_percentage_min)
+PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 {
 	PyObject *opt_PyList = PyList_New(0);
 
@@ -84,11 +87,52 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type, const int days
 	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
 	{
 		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
-		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, *(trade_day_info_arr_ptr->cur_len_ptr) - 1, days_range, delta_percentage_min))
+		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, *(trade_day_info_arr_ptr->cur_len_ptr) - 1))
 			PyList_Append(opt_PyList, PyLong_FromLong(work_arr_ptr->ptr_arr[i]->stock_id));
 	}
 
 	return opt_PyList;
+}
+
+void calc_p(stock_data_arr *work_arr_ptr, const int days, const float percentage)
+{
+	int total = 0;
+	int match = 0;
+	int result;
+
+	trade_day_info_arr *trade_day_info_arr_ptr;
+	int info_len;
+
+	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
+	{
+		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
+		info_len = *(trade_day_info_arr_ptr->cur_len_ptr);
+		for (int trade_day_info_idx = info_len - 1 - (days - 1); trade_day_info_idx < info_len; trade_day_info_idx++)
+		{
+			result = is_match_rule_01(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, percentage);
+			if (result == -1) //not target
+				continue;
+
+			if (result == 0) //not match
+			{
+				total++;
+				continue;
+			}
+
+			if (result == 1) //match
+			{
+				total++;
+				match++;
+				continue;
+			}
+
+			assert(0); //shoud not go here
+		}
+	}
+
+	printf("total: %d\n", total);
+	printf("match: %d\n", match);
+	printf("possibility: %f%c\n", (float)match / total * 100, '%');
 }
 
 // int main()

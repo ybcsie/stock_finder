@@ -47,9 +47,16 @@ void del_trade_day_info_arr(trade_day_info_arr *trade_day_info_arr_ptr);
 void add_trade_day_info_new_item(trade_day_info_arr *trade_day_info_arr_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta);
 void update_trade_day_info_last_item(trade_day_info_arr *trade_day_info_arr_ptr, int date, float vol, float first, float highest, float lowest, float last, float delta);
 
-int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min);
+int days_range;
+int delta_percentage_min;
+
+int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
 int is_jump(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
 int has_gap(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
-int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int days_range, int delta_percentage_min);
+int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
+
+// rule 01:
+// day-1 newh + limup -> day jump -> is (high-open)/open > percentage (high > open) ?
+int is_match_rule_01(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float percentage);
 
 #endif

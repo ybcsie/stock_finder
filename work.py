@@ -2,7 +2,6 @@ import stock
 import os
 import datetime
 
-
 listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
 
@@ -14,6 +13,8 @@ attack_delta_percentage_min = 9
 work_arr = None
 ready = False
 
+analysis_mode = False
+
 
 def worker(display_func):
     global work_arr
@@ -24,21 +25,23 @@ def worker(display_func):
     while True:
         updated = True
 
-        logger.logp("update_listed_list : start")
-        stock.updater.update_listed_list(listed_sid_path)
-        logger.logp("update_listed_list : done\n")
+        if not analysis_mode:
+            logger.logp("update_listed_list : start")
+            stock.updater.update_listed_list(listed_sid_path)
+            logger.logp("update_listed_list : done\n")
 
         logger.logp("read_stock_data_cptr_list : start")
         listed_list = stock.reader.read_stock_data_cptr_list(listed_sid_path, months * 30)
         logger.logp("read_stock_data_cptr_list : done\n")
 
-        logger.logp("update_smd_in_list : start")
-        stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
-        while not finish_flag[0]:
-            stock.tools.delay(5)
-        logger.logp("update_smd_in_list : done\n")
+        if not analysis_mode:
+            logger.logp("update_smd_in_list : start")
+            stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
+            while not finish_flag[0]:
+                stock.tools.delay(5)
+            logger.logp("update_smd_in_list : done\n")
 
-        finish_flag[0] = False
+            finish_flag[0] = False
 
         logger.logp("read_trade_data_in_list : start")
         stock.reader.read_trade_data_in_list(trade_data_dir, listed_list, months)
@@ -46,6 +49,10 @@ def worker(display_func):
 
         work_arr = stock.init_work_arr(listed_list)
         ready = True
+
+        if analysis_mode:
+            stock.utils.cal_p(work_arr, days_range, attack_delta_percentage_min, 60, 1)
+            return
 
         while True:
             now = datetime.datetime.now()
@@ -61,7 +68,7 @@ def worker(display_func):
             op_file = open("results/results.tmp", 'w', encoding="UTF-8")
 
             op_js = ""
-            attack_list = stock.get_attack(work_arr, days_range, attack_delta_percentage_min)
+            attack_list = stock.utils.get_attack(work_arr, days_range, attack_delta_percentage_min)
             if len(attack_list) > 0:
                 print("\nattack:")
                 for stock_id in attack_list:
@@ -75,7 +82,7 @@ def worker(display_func):
             op_file.flush()
 
             op_js = ""
-            newhigh_list = stock.get_new_high(work_arr, days_range, new_high_delta_percentage_min)
+            newhigh_list = stock.utils.get_new_high(work_arr, days_range, new_high_delta_percentage_min)
             if len(newhigh_list) > 0:
                 print("\nnew high:")
                 for stock_id in newhigh_list:
@@ -89,7 +96,7 @@ def worker(display_func):
             op_file.flush()
 
             op_js = ""
-            newhigh_max_list = stock.get_new_high(work_arr, days_range, attack_delta_percentage_min)
+            newhigh_max_list = stock.utils.get_new_high(work_arr, days_range, attack_delta_percentage_min)
             if len(newhigh_max_list) > 0:
                 print("\nnew high max:")
                 for stock_id in newhigh_max_list:
@@ -117,7 +124,7 @@ def worker(display_func):
         work_arr = None
 
 
-func_dict = {"attack": stock.get_attack, "newhigh": stock.get_new_high}
+func_dict = {"attack": stock.utils.get_attack, "newhigh": stock.utils.get_new_high}
 
 
 def get_js(var_name, delta_percentage_min):
@@ -172,4 +179,5 @@ def init(display_func):
 
 
 if __name__ == '__main__':
+    analysis_mode = True
     worker(print)
