@@ -4,7 +4,7 @@ import datetime
 
 def get_new_high(work_arr_cptr, days_range, delta_percentage_min):
     stock.set_days_range(days_range)
-    stock.set_days_range(delta_percentage_min)
+    stock.set_delta_percentage_min(delta_percentage_min)
     opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_NEWHIGH)
 
     return opt_list
@@ -12,7 +12,7 @@ def get_new_high(work_arr_cptr, days_range, delta_percentage_min):
 
 def get_attack(work_arr_cptr, days_range, delta_percentage_min):
     stock.set_days_range(days_range)
-    stock.set_days_range(delta_percentage_min)
+    stock.set_delta_percentage_min(delta_percentage_min)
     opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_ATTACK)
 
     return opt_list
@@ -20,7 +20,7 @@ def get_attack(work_arr_cptr, days_range, delta_percentage_min):
 
 def cal_p(work_arr_cptr, days_range, delta_percentage_min, days, percentage):
     stock.set_days_range(days_range)
-    stock.set_days_range(delta_percentage_min)
+    stock.set_delta_percentage_min(delta_percentage_min)
     stock.calc_p(work_arr_cptr, days, percentage)
 
 

@@ -114,4 +114,3 @@ def read_livedata(livedata, stock_data_cptr):
         delta = 0.0
 
     stock.add_trade_day_info(stock_data_cptr, date, vol, first, highest, lowest, last, delta)
-
