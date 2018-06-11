@@ -13,8 +13,6 @@ attack_delta_percentage_min = 9
 work_arr = None
 ready = False
 
-analysis_mode = False
-
 
 def worker(display_func):
     global work_arr
@@ -25,23 +23,21 @@ def worker(display_func):
     while True:
         updated = True
 
-        if not analysis_mode:
-            logger.logp("update_listed_list : start")
-            stock.updater.update_listed_list(listed_sid_path)
-            logger.logp("update_listed_list : done\n")
+        logger.logp("update_listed_list : start")
+        stock.updater.update_listed_list(listed_sid_path)
+        logger.logp("update_listed_list : done\n")
 
         logger.logp("read_stock_data_cptr_list : start")
         listed_list = stock.reader.read_stock_data_cptr_list(listed_sid_path, months * 30)
         logger.logp("read_stock_data_cptr_list : done\n")
 
-        if not analysis_mode:
-            logger.logp("update_smd_in_list : start")
-            stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
-            while not finish_flag[0]:
-                stock.tools.delay(5)
-            logger.logp("update_smd_in_list : done\n")
+        logger.logp("update_smd_in_list : start")
+        stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
+        while not finish_flag[0]:
+            stock.tools.delay(5)
+        logger.logp("update_smd_in_list : done\n")
 
-            finish_flag[0] = False
+        finish_flag[0] = False
 
         logger.logp("read_trade_data_in_list : start")
         stock.reader.read_trade_data_in_list(trade_data_dir, listed_list, months)
@@ -49,10 +45,6 @@ def worker(display_func):
 
         work_arr = stock.init_work_arr(listed_list)
         ready = True
-
-        if analysis_mode:
-            stock.utils.cal_p(work_arr, days_range, attack_delta_percentage_min, 60, 1)
-            return
 
         while True:
             now = datetime.datetime.now()
@@ -180,4 +172,8 @@ def init(display_func):
 
 if __name__ == '__main__':
     analysis_mode = True
-    worker(print)
+    if analysis_mode:
+        init(print)
+        stock.utils.cal_p(work_arr, days_range, attack_delta_percentage_min, 60, 1.5)
+    else:
+        worker(print)

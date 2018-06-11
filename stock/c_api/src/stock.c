@@ -107,21 +107,22 @@ void calc_p(stock_data_arr *work_arr_ptr, const int days, const float percentage
 	{
 		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
 		info_len = *(trade_day_info_arr_ptr->cur_len_ptr);
-		for (int trade_day_info_idx = info_len - 1 - (days - 1); trade_day_info_idx < info_len; trade_day_info_idx++)
+		int start_idx = info_len - 1 - (days - 1);
+		if (start_idx < 1)
+			start_idx = 1;
+
+		for (int trade_day_info_idx = start_idx; trade_day_info_idx < info_len; trade_day_info_idx++)
 		{
 			result = is_match_rule_01(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, percentage);
 			if (result == -1) //not target
 				continue;
 
+			total++;
 			if (result == 0) //not match
-			{
-				total++;
 				continue;
-			}
 
 			if (result == 1) //match
 			{
-				total++;
 				match++;
 				continue;
 			}

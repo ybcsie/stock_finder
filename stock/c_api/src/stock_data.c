@@ -181,7 +181,10 @@ int is_match_rule_01(trade_day_info **trade_day_info_ptr_arr, int trade_day_info
 	if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
 		return -1; //not target
 
-	if (is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+	if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx))
+		return -1; //not target
+
+	if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 		return -1; //not target
 
 	float highest = trade_day_info_ptr_arr[trade_day_info_idx]->highest;
