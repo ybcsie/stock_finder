@@ -88,7 +88,10 @@ def read_livedata(livedata, stock_data_cptr):
     try:
         first = tools.float_parser(livedata["o"])
     except KeyError:
-        first = 0.0
+        try:
+            first = tools.float_parser(livedata["pz"])
+        except KeyError:
+            first = 0.0
 
     try:
         highest = tools.float_parser(livedata["h"])
@@ -101,10 +104,10 @@ def read_livedata(livedata, stock_data_cptr):
         lowest = 0.0
 
     try:
-        last = tools.float_parser(livedata["pz"])
+        last = tools.float_parser(livedata["z"])
     except KeyError:
         try:
-            last = tools.float_parser(livedata["z"])
+            last = tools.float_parser(livedata["pz"])
         except KeyError:
             last = 0.0
 

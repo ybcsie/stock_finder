@@ -174,6 +174,10 @@ if __name__ == '__main__':
     analysis_mode = True
     if analysis_mode:
         init(print)
-        stock.utils.cal_p(work_arr, days_range, attack_delta_percentage_min, 60, 1.5)
+        while True:
+            days_range_in = int(input("days_range:"))
+            days_in = int(input("days:"))
+            percentage = float(input("percentage:"))
+            stock.utils.cal_p(work_arr, days_range_in, attack_delta_percentage_min, days_in, percentage)
     else:
         worker(print)
