@@ -17,10 +17,13 @@ void add_trade_day_info(stock_data *stock_data_ptr, const int date, const float 
 
 void set_days_range(int value);
 void set_delta_percentage_min(float value);
+void set_price_limit(float value);
 
 extern const int WORK_TYPE_NEWHIGH;
 extern const int WORK_TYPE_ATTACK;
 PyObject *work(stock_data_arr *work_arr_ptr, const int work_type);
-void calc_p(stock_data_arr *work_arr_ptr, const int days, const float percentage);
+float calc_days_e(stock_data_arr *work_arr_ptr, const int days, const float mppt, const int buy_rule_no, const int RoI_rule_no);
+float calc_day_e(stock_data_arr *work_arr_ptr, const int date, const float mppt, const int buy_rule_no, const int RoI_rule_no);
+float calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float mppt, const int buy_rule_no, const int RoI_rule_no);
 
 #endif

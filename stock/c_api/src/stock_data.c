@@ -7,6 +7,7 @@
 
 int days_range = 150;
 int delta_percentage_min = 5;
+float price_limit = 150;
 
 trade_day_info_arr *new_trade_day_info_arr_ptr(const int size)
 {
@@ -67,6 +68,45 @@ void update_trade_day_info_last_item(trade_day_info_arr *trade_day_info_arr_ptr,
 	last_item_ptr->delta = delta;
 }
 
+int find_idx_by_date(trade_day_info_arr *trade_day_info_arr_ptr, int date)
+{
+	for (int i = *(trade_day_info_arr_ptr->cur_len_ptr) - 1; i >= 0; i--)
+	{
+		if (trade_day_info_arr_ptr->ptr_arr[i]->date == date)
+			return i;
+
+		if (trade_day_info_arr_ptr->ptr_arr[i]->date < date)
+			return -1;
+	}
+	return -1;
+}
+
+int find_idx_range_by_yyyymm(trade_day_info_arr *trade_day_info_arr_ptr, int yyyymm, int *start_idx_ptr, int *end_idx_ptr)
+{
+	*end_idx_ptr = -1;
+	*start_idx_ptr = -1;
+
+	for (int i = *(trade_day_info_arr_ptr->cur_len_ptr) - 1; i >= 0; i--)
+	{
+		if (*end_idx_ptr == -1 && trade_day_info_arr_ptr->ptr_arr[i]->date / 100 == yyyymm)
+			*end_idx_ptr = i;
+
+		if (*end_idx_ptr != -1 && trade_day_info_arr_ptr->ptr_arr[i]->date / 100 < yyyymm)
+		{
+			*start_idx_ptr = i + 1;
+			return 0;
+		}
+	}
+
+	if (*end_idx_ptr != -1 && trade_day_info_arr_ptr->ptr_arr[0]->date / 100 == yyyymm)
+	{
+		*start_idx_ptr = 0;
+		return 0;
+	}
+
+	return -1;
+}
+
 int find_highest_idx(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, int earliest_date)
 {
 	int highest_idx = trade_day_info_idx;
@@ -92,6 +132,14 @@ float get_delta_percentage(trade_day_info **trade_day_info_ptr_arr, int trade_da
 		return 0;
 
 	return trade_day_info_ptr_arr[trade_day_info_idx]->delta / trade_day_info_ptr_arr[trade_day_info_idx - 1]->last * 100;
+}
+
+float get_open_delta_percentage(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
+{
+	if (trade_day_info_idx == 0)
+		return 0;
+
+	return (trade_day_info_ptr_arr[trade_day_info_idx]->first - trade_day_info_ptr_arr[trade_day_info_idx - 1]->last) / trade_day_info_ptr_arr[trade_day_info_idx - 1]->last * 100;
 }
 
 int is_limup(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
@@ -172,29 +220,87 @@ int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 	return 0; //false
 }
 
-int is_match_rule_01(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float percentage)
+int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float mppt, int rule_no)
 {
 	// check is first?
 	if (trade_day_info_idx == 0)
-		return -1; //not target
+		return 0; //false
 
-	if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
-		return -1; //not target
+	// day-1 newh + limup -> day jump -> is (high-open)/open > percentage (high > open) ?
+	if (rule_no == 1)
+	{
+		if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
+			return 0; //false
 
-	if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx))
-		return -1; //not target
+		if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) + mppt > 10)
+			// if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) > 9)
+			return 0; //false
 
-	if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
-		return -1; //not target
+		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+			return 0; //false
 
+		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+			return 0; //false
+
+		return 1; //true
+	}
+
+	if (rule_no == 2)
+	{
+		if (trade_day_info_ptr_arr[trade_day_info_idx]->first > price_limit)
+			return 0; //false
+
+		if (trade_day_info_ptr_arr[trade_day_info_idx]->first < 5)
+			return 0; //false
+
+		if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
+			return 0; //false
+
+		if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) + mppt > 10)
+			// if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) > 9)
+			return 0; //false
+
+		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+			return 0; //false
+
+		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+			return 0; //false
+
+		return 1; //true
+	}
+
+	assert(0);
+}
+
+float get_RoI(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float mppt, int rule_no)
+{
 	float highest = trade_day_info_ptr_arr[trade_day_info_idx]->highest;
-	float first = trade_day_info_ptr_arr[trade_day_info_idx]->first;
+	float lowest = trade_day_info_ptr_arr[trade_day_info_idx]->lowest;
+	float open = trade_day_info_ptr_arr[trade_day_info_idx]->first;
+	float close = trade_day_info_ptr_arr[trade_day_info_idx]->last;
+	float yhigh = trade_day_info_ptr_arr[trade_day_info_idx - 1]->highest;
 
-	if (highest <= first)
-		return 0; //false
+	// buy at open -> highest RoI > mppt -> RoI = mppt   else -> sell at close
+	if (rule_no == 1)
+	{
+		if ((highest - open) / open * 100 < mppt)
+			return (close - open) / open * 100;
 
-	if ((highest - first) / first * 100 < percentage)
-		return 0; //false
+		return mppt;
+	}
 
-	return 1; //true
+	if (rule_no == 2)
+	{
+		if ((highest - open) / open * 100 < mppt)
+		{
+			if (lowest < yhigh)
+				return (yhigh - open) / open * 100;
+
+			return (close - open) / open * 100;
+		}
+
+		return mppt;
+	}
+
+	assert(0);
 }

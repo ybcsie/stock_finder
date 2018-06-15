@@ -74,6 +74,7 @@ void add_trade_day_info(stock_data *stock_data_ptr, int date, float vol, float f
 
 void set_days_range(int value) { days_range = value; }
 void set_delta_percentage_min(float value) { delta_percentage_min = value; }
+void set_price_limit(float value) { price_limit = value; }
 
 static int (*work_funcs[])(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx) = {is_new_high, is_attack};
 const int WORK_TYPE_NEWHIGH = 0;
@@ -94,11 +95,9 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 	return opt_PyList;
 }
 
-void calc_p(stock_data_arr *work_arr_ptr, const int days, const float percentage)
+float calc_days_e(stock_data_arr *work_arr_ptr, const int days, const float mppt, const int buy_rule_no, const int RoI_rule_no)
 {
-	int total = 0;
-	int match = 0;
-	int result;
+	float er = 0; //E of win reward ratio
 
 	trade_day_info_arr *trade_day_info_arr_ptr;
 	int info_len;
@@ -113,53 +112,89 @@ void calc_p(stock_data_arr *work_arr_ptr, const int days, const float percentage
 
 		for (int trade_day_info_idx = start_idx; trade_day_info_idx < info_len; trade_day_info_idx++)
 		{
-			result = is_match_rule_01(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, percentage);
-			if (result == -1) //not target
-				continue;
+			if (!is_buy_target(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, buy_rule_no))
+				continue; //not target
 
-			total++;
-			if (result == 0) //not match
-				continue;
-
-			if (result == 1) //match
-			{
-				match++;
-				continue;
-			}
-
-			assert(0); //shoud not go here
+			er += get_RoI(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, RoI_rule_no);
 		}
 	}
 
-	printf("total: %d\n", total);
-	printf("match: %d\n", match);
-	printf("possibility: %f%c\n", (float)match / total * 100, '%');
+	// printf("total: %d\n", total);
+	// printf("match: %d\n", match);
+	// printf("possibility: %f%c\n", (float)match / total * 100, '%');
+	printf("E of R: %f%c\n", er, '%');
+	return er;
 }
 
-// int main()
-// {
-//     stock_data_arr arr = new_stock_data_arr(1000);
+float calc_day_e(stock_data_arr *work_arr_ptr, const int date, const float mppt, const int buy_rule_no, const int RoI_rule_no)
+{
+	float er = 0; //E of win reward ratio
 
-//     stock_data sd = new_stock_data(1111, 20180101);
+	trade_day_info_arr *trade_day_info_arr_ptr;
+	int trade_day_info_idx;
 
-//     add_trade_day_info(sd, 20180101, 10, 10, 10, 10, 10, 10);
+	int no_target = 1;
 
-//     add_stock_data(arr, sd);
+	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
+	{
+		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
 
-//     printf("%d\n", arr.arr[0].stock_id);
-//     printf("%d\n", arr.arr[0].trade_day_info_list_ptr->head_ptr->date);
+		trade_day_info_idx = find_idx_by_date(trade_day_info_arr_ptr, date);
 
-//     // trade_day_info_dllist ll = new_trade_day_info_dllist();
-//     // add_trade_day_info(&ll, 20000101, 0, 0, 0, 0, 0, 0);
-//     // add_trade_day_info(&ll, 20000102, 0, 0, 0, 0, 0, 0);
+		if (trade_day_info_idx == -1)
+			continue;
 
-//     // printf("%d\n", listed_arr[5].stock_id);
-//     // printf("%d\n", listed_arr[5].ipo_date);
-//     // printf("%d\n", listed_arr[20].stock_id);
-//     // printf("%d\n", listed_arr[20].ipo_date);
+		no_target = 0;
 
-//     printf("88\n");
-//     getchar();
+		if (!is_buy_target(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, buy_rule_no))
+			continue; //not target
 
-//     return 0;
-// }
+		er += get_RoI(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, RoI_rule_no);
+	}
+
+	if (no_target)
+		er = -99999;
+	else
+		assert(er != -99999);
+
+	printf("E of R: %f%c\n", er, '%');
+	return er;
+}
+
+float calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float mppt, const int buy_rule_no, const int RoI_rule_no)
+{
+	trade_day_info_arr *trade_day_info_arr_ptr;
+
+	int no_target = 1;
+
+	int start_idx;
+	int end_idx;
+
+	float er = 0; //E of win reward ratio
+
+	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
+	{
+		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
+
+		if (find_idx_range_by_yyyymm(trade_day_info_arr_ptr, yyyymm, &start_idx, &end_idx) != 0)
+			continue;
+
+		no_target = 0;
+
+		for (int trade_day_info_idx = start_idx; trade_day_info_idx <= end_idx; trade_day_info_idx++)
+		{
+			if (!is_buy_target(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, buy_rule_no))
+				continue; //not target
+
+			er += get_RoI(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, RoI_rule_no);
+		}
+	}
+
+	if (no_target)
+		er = -99999;
+	else
+		assert(er != -99999);
+
+	printf("E of R: %f%c\n", er, '%');
+	return er;
+}

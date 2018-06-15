@@ -156,9 +156,9 @@ def init(display_func):
     logger.logp("read_stock_data_cptr_list : done\n")
 
     logger.logp("update_smd_in_list : start")
-    stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
-    while not finish_flag[0]:
-        stock.tools.delay(5)
+    # stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
+    # while not finish_flag[0]:
+    #     stock.tools.delay(5)
     logger.logp("update_smd_in_list : done\n")
 
     finish_flag[0] = False
@@ -174,10 +174,21 @@ if __name__ == '__main__':
     analysis_mode = True
     if analysis_mode:
         init(print)
-        while True:
-            days_range_in = int(input("days_range:"))
-            days_in = int(input("days:"))
-            percentage = float(input("percentage:"))
-            stock.utils.cal_p(work_arr, days_range_in, attack_delta_percentage_min, days_in, percentage)
+
+        days_range_in = 120
+        roi_rule_no = 2
+        buy_rule_no = 2
+
+        stock.stock.set_price_limit(100)
+
+        stock.figure.plot_3months_percentage(work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
+
+        stock.figure.plot_months(work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
+        stock.figure.plot_months_percentage(work_arr, days_range_in, attack_delta_percentage_min, 24, buy_rule_no, roi_rule_no)
+
+        stock.figure.plot_days(work_arr, days_range_in, attack_delta_percentage_min, 600, buy_rule_no, roi_rule_no)
+
+        stock.figure.plot(work_arr, days_range_in, attack_delta_percentage_min, buy_rule_no, roi_rule_no)
+
     else:
         worker(print)

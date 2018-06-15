@@ -1,5 +1,5 @@
 from .c_api import stock
-from . import reader, livedata, tools, updater, utils
+from . import reader, livedata, tools, updater, utils, figure
 from .msgopt import Logger
 
 
