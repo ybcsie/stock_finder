@@ -5,9 +5,9 @@ import datetime
 listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
 
-months = 25
-days_range = 150
-new_high_delta_percentage_min = 5
+months = 48
+days_range = 120
+new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
 
 work_arr = None
