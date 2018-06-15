@@ -21,7 +21,7 @@ def update_listed_list(listed_path):
     return 0
 
 
-def exist_correct_smd_content(smd_path):
+def get_exist_smd_dict(smd_path):
     opt = {}
     if not os.path.exists(smd_path):
         return opt
@@ -57,7 +57,7 @@ def is_content_need_update(content):
 
 
 def update_smd(smd_path, stock_id, months):
-    exist_dict = exist_correct_smd_content(smd_path)
+    exist_dict = get_exist_smd_dict(smd_path)
 
     now = datetime.datetime.now()
     cur_month = now.month
@@ -73,10 +73,10 @@ def update_smd(smd_path, stock_id, months):
         if is_content_need_update(content):
             content = crawler.get_month_data(cur_year, cur_month, stock_id)
 
-        if content is None:
-            logger.logp("cannot get data: {} {} {}".format(cur_year, cur_month, stock_id))
-        else:
-            exist_dict[key] = content
+            if content is None:
+                logger.logp("cannot get data: {} {} {}".format(cur_year, cur_month, stock_id))
+            else:
+                exist_dict[key] = content
 
         cur_month -= 1
 
@@ -127,3 +127,70 @@ def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, for
 
 def update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag):
     threading.Thread(target=t_update_smd_in_list, args=(stock_data_cptr_list, smd_dir, months, finish_flag)).start()
+
+
+def get_exist_dtd_dict(dtd_path):
+    if not os.path.exists(dtd_path):
+        return {}
+
+    try:
+        dtd_file = open(dtd_path, 'r')
+
+        opt = json.loads(dtd_file.read())
+
+        dtd_file.close()
+
+        return opt
+
+    except:
+        return {}
+
+
+def update_month_dtd(dtd_path, yyyymm):
+    if yyyymm < 201401:
+        return
+
+    now = datetime.datetime.now()
+    cur_datetime = datetime.datetime.strptime("{}01".format(yyyymm), "%Y%m%d")
+    one_day_delta = datetime.timedelta(days=1)
+
+    exist_dict = get_exist_dtd_dict(dtd_path)
+    while True:
+        if cur_datetime > now or int(cur_datetime.strftime("%Y%m")) > yyyymm:
+            break
+
+        if cur_datetime >= datetime.datetime.strptime("20140106", "%Y%m%d"):
+            key = "{}".format(cur_datetime.strftime("%Y%m%d"))
+            content = exist_dict.get(key)
+
+            if content is None:
+                content = crawler.get_day_trading_data(key)
+
+                if content is None:
+                    logger.logp("cannot get data: {}".format(key))
+                else:
+                    exist_dict[key] = content
+
+        cur_datetime += one_day_delta
+
+    dtd_tmp_path = "{}.tmp".format(dtd_path)
+    dtd_tmp_file = open(dtd_tmp_path, 'w', encoding="UTF-8")
+    dtd_tmp_file.write(json.dumps(exist_dict))
+    dtd_tmp_file.close()
+
+    os.replace(dtd_tmp_path, dtd_path)
+
+
+def update_dtd(dtd_dir, months):
+    now = datetime.datetime.now()
+    cur_month = now.month
+    cur_year = now.year
+    for i in range(months):
+        if cur_month == 0:
+            cur_month = 12
+            cur_year -= 1
+
+        yyyymm = cur_year * 100 + cur_month
+        update_month_dtd("{}/{}.dtd".format(dtd_dir, yyyymm), yyyymm)
+
+        cur_month -= 1

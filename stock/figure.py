@@ -78,7 +78,7 @@ def plot_days(work_arr, days_range, attack_delta_percentage_min, days, buy_rule_
 
 def plot_months(work_arr, days_range, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no):
     figure_name = "ROI_month"
-    percentage = 3
+    percentage = 2
     now = datetime.datetime.now()
 
     plt.figure(figsize=(16, 9))
@@ -237,12 +237,12 @@ def plot_3months_percentage(work_arr, days_range, attack_delta_percentage_min, m
             cur_year -= 1
 
         yyyymm_list.append(int("{}{:02d}".format(cur_year, cur_month)))
-        percentage = 1
+        percentage = 3
 
         y_each_month.append([])
 
         while True:
-            if percentage >= 9:
+            if percentage >= 6:
                 break
 
             er = utils.cal_month_e(work_arr, days_range, attack_delta_percentage_min, yyyymm_list[i], percentage, buy_rule_no, roi_rule_no)

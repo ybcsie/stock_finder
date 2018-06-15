@@ -5,7 +5,7 @@ import datetime
 listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
 
-months = 48
+months = 60
 days_range = 120
 new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
@@ -151,6 +151,8 @@ def init(display_func):
     stock.updater.update_listed_list(listed_sid_path)
     logger.logp("update_listed_list : done\n")
 
+    stock.updater.update_dtd("dtd", months)
+
     logger.logp("read_stock_data_cptr_list : start")
     listed_list = stock.reader.read_stock_data_cptr_list(listed_sid_path, months * 30)
     logger.logp("read_stock_data_cptr_list : done\n")
@@ -179,7 +181,7 @@ if __name__ == '__main__':
         roi_rule_no = 2
         buy_rule_no = 2
 
-        stock.stock.set_price_limit(100)
+        stock.stock.set_price_limit(160)
 
         stock.figure.plot_3months_percentage(work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
 
