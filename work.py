@@ -5,7 +5,7 @@ import datetime
 listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
 
-months = 60
+months = 96
 days_range = 120
 new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
@@ -28,11 +28,13 @@ def worker(display_func):
         logger.logp("update_listed_list : done\n")
 
         logger.logp("read_stock_data_cptr_list : start")
-        listed_list = stock.reader.read_stock_data_cptr_list(listed_sid_path, months * 30)
+        listed_list = stock.reader.read_stock_data_cptr_list(
+            listed_sid_path, months * 30)
         logger.logp("read_stock_data_cptr_list : done\n")
 
         logger.logp("update_smd_in_list : start")
-        stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
+        stock.updater.update_smd_in_list(
+            listed_list, trade_data_dir, months, finish_flag, force_update=True)
         while not finish_flag[0]:
             stock.tools.delay(5)
         logger.logp("update_smd_in_list : done\n")
@@ -40,7 +42,8 @@ def worker(display_func):
         finish_flag[0] = False
 
         logger.logp("read_trade_data_in_list : start")
-        stock.reader.read_trade_data_in_list(trade_data_dir, listed_list, months)
+        stock.reader.read_trade_data_in_list(
+            trade_data_dir, listed_list, months)
         logger.logp("read_trade_data_in_list : done\n")
 
         work_arr = stock.init_work_arr(listed_list)
@@ -60,7 +63,8 @@ def worker(display_func):
             op_file = open("results/results.tmp", 'w', encoding="UTF-8")
 
             op_js = ""
-            attack_list = stock.utils.get_attack(work_arr, days_range, attack_delta_percentage_min)
+            attack_list = stock.utils.get_attack(
+                work_arr, days_range, attack_delta_percentage_min)
             if len(attack_list) > 0:
                 print("\nattack:")
                 for stock_id in attack_list:
@@ -74,7 +78,8 @@ def worker(display_func):
             op_file.flush()
 
             op_js = ""
-            newhigh_list = stock.utils.get_new_high(work_arr, days_range, new_high_delta_percentage_min)
+            newhigh_list = stock.utils.get_new_high(
+                work_arr, days_range, new_high_delta_percentage_min)
             if len(newhigh_list) > 0:
                 print("\nnew high:")
                 for stock_id in newhigh_list:
@@ -88,7 +93,8 @@ def worker(display_func):
             op_file.flush()
 
             op_js = ""
-            newhigh_max_list = stock.utils.get_new_high(work_arr, days_range, attack_delta_percentage_min)
+            newhigh_max_list = stock.utils.get_new_high(
+                work_arr, days_range, attack_delta_percentage_min)
             if len(newhigh_max_list) > 0:
                 print("\nnew high max:")
                 for stock_id in newhigh_max_list:
@@ -116,7 +122,8 @@ def worker(display_func):
         work_arr = None
 
 
-func_dict = {"attack": stock.utils.get_attack, "newhigh": stock.utils.get_new_high}
+func_dict = {"attack": stock.utils.get_attack,
+             "newhigh": stock.utils.get_new_high}
 
 
 def get_js(var_name, delta_percentage_min):
@@ -128,7 +135,8 @@ def get_js(var_name, delta_percentage_min):
             delta_percentage_min = attack_delta_percentage_min
 
         op_js = ""
-        op_list = func_dict[var_name](work_arr, days_range, delta_percentage_min)
+        op_list = func_dict[var_name](
+            work_arr, days_range, delta_percentage_min)
         if len(op_list) > 0:
             print("\n{}:".format(var_name))
             for stock_id in op_list:
@@ -154,7 +162,8 @@ def init(display_func):
     stock.updater.update_dtd("dtd", months)
 
     logger.logp("read_stock_data_cptr_list : start")
-    listed_list = stock.reader.read_stock_data_cptr_list(listed_sid_path, months * 30)
+    listed_list = stock.reader.read_stock_data_cptr_list(
+        listed_sid_path, months * 30)
     logger.logp("read_stock_data_cptr_list : done\n")
 
     logger.logp("update_smd_in_list : start")
@@ -183,14 +192,19 @@ if __name__ == '__main__':
 
         stock.stock.set_price_limit(160)
 
-        stock.figure.plot_3months_percentage(work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
+        stock.figure.plot_3months_percentage(
+            work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
 
-        stock.figure.plot_months(work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
-        stock.figure.plot_months_percentage(work_arr, days_range_in, attack_delta_percentage_min, 24, buy_rule_no, roi_rule_no)
+        stock.figure.plot_months(
+            work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
+        stock.figure.plot_months_percentage(
+            work_arr, days_range_in, attack_delta_percentage_min, 24, buy_rule_no, roi_rule_no)
 
-        stock.figure.plot_days(work_arr, days_range_in, attack_delta_percentage_min, 600, buy_rule_no, roi_rule_no)
+        stock.figure.plot_days(
+            work_arr, days_range_in, attack_delta_percentage_min, 600, buy_rule_no, roi_rule_no)
 
-        stock.figure.plot(work_arr, days_range_in, attack_delta_percentage_min, buy_rule_no, roi_rule_no)
+        stock.figure.plot(work_arr, days_range_in,
+                          attack_delta_percentage_min, buy_rule_no, roi_rule_no)
 
     else:
         worker(print)

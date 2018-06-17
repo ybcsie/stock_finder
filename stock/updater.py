@@ -74,7 +74,8 @@ def update_smd(smd_path, stock_id, months):
             content = crawler.get_month_data(cur_year, cur_month, stock_id)
 
             if content is None:
-                logger.logp("cannot get data: {} {} {}".format(cur_year, cur_month, stock_id))
+                logger.logp("cannot get data: {} {} {}".format(
+                    cur_year, cur_month, stock_id))
             else:
                 exist_dict[key] = content
 
@@ -97,7 +98,8 @@ def require_update(update_log_path):
     log_file.close()
     now = datetime.datetime.now()
 
-    update_datetime = datetime.datetime.strptime("{}/{}/{}/15".format(now.year, now.month, now.day), "%Y/%m/%d/%H")
+    update_datetime = datetime.datetime.strptime(
+        "{}/{}/{}/15".format(now.year, now.month, now.day), "%Y/%m/%d/%H")
     if now.hour < 15:
         update_datetime -= datetime.timedelta(days=1)
 
@@ -107,7 +109,7 @@ def require_update(update_log_path):
     return True
 
 
-def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, force_update=False):
+def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, force_update):
     update_log_path = smd_dir + "/update.log"
 
     if require_update(update_log_path) or force_update:
@@ -125,8 +127,9 @@ def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, for
     finish_flag[0] = True
 
 
-def update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag):
-    threading.Thread(target=t_update_smd_in_list, args=(stock_data_cptr_list, smd_dir, months, finish_flag)).start()
+def update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, force_update=False):
+    threading.Thread(target=t_update_smd_in_list, args=(
+        stock_data_cptr_list, smd_dir, months, finish_flag, force_update)).start()
 
 
 def get_exist_dtd_dict(dtd_path):
