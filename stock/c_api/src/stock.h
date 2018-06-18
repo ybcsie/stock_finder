@@ -14,6 +14,7 @@ int get_stock_id(stock_data *stock_data_ptr);
 void add_stock_data(stock_data_arr *work_arr_ptr, stock_data *stock_data_ptr);
 
 void add_trade_day_info(stock_data *stock_data_ptr, const int date, const float vol, const float first, const float highest, const float lowest, const float last, const float delta);
+void enable_day_trading(stock_data *stock_data_ptr, int date);
 
 void set_days_range(int value);
 void set_delta_percentage_min(float value);

@@ -72,6 +72,15 @@ void add_trade_day_info(stock_data *stock_data_ptr, int date, float vol, float f
 	add_trade_day_info_new_item(arr_ptr, date, vol, first, highest, lowest, last, delta);
 }
 
+void enable_day_trading(stock_data *stock_data_ptr, int date)
+{
+	int idx = find_idx_by_date(stock_data_ptr->trade_day_info_arr_ptr, date);
+	if (idx == -1)
+		return;
+
+	stock_data_ptr->trade_day_info_arr_ptr->ptr_arr[idx]->day_trading = 1;
+}
+
 void set_days_range(int value) { days_range = value; }
 void set_delta_percentage_min(float value) { delta_percentage_min = value; }
 void set_price_limit(float value) { price_limit = value; }

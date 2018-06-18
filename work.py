@@ -4,8 +4,9 @@ import datetime
 
 listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
+dtd_dir = "dtd"
 
-months = 96
+months = 48
 days_range = 120
 new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
@@ -159,7 +160,7 @@ def init(display_func):
     stock.updater.update_listed_list(listed_sid_path)
     logger.logp("update_listed_list : done\n")
 
-    stock.updater.update_dtd("dtd", months)
+    stock.updater.update_dtd(dtd_dir, months)
 
     logger.logp("read_stock_data_cptr_list : start")
     listed_list = stock.reader.read_stock_data_cptr_list(
@@ -178,6 +179,8 @@ def init(display_func):
     stock.reader.read_trade_data_in_list(trade_data_dir, listed_list, months)
     logger.logp("read_trade_data_in_list : done\n")
 
+    stock.reader.read_all_dtd(dtd_dir, listed_list)
+
     work_arr = stock.init_work_arr(listed_list)
 
 
@@ -193,15 +196,15 @@ if __name__ == '__main__':
         stock.stock.set_price_limit(160)
 
         stock.figure.plot_3months_percentage(
-            work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
+            work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
 
         stock.figure.plot_months(
-            work_arr, days_range_in, attack_delta_percentage_min, 36, buy_rule_no, roi_rule_no)
+            work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
         stock.figure.plot_months_percentage(
-            work_arr, days_range_in, attack_delta_percentage_min, 24, buy_rule_no, roi_rule_no)
+            work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
 
         stock.figure.plot_days(
-            work_arr, days_range_in, attack_delta_percentage_min, 600, buy_rule_no, roi_rule_no)
+            work_arr, days_range_in, attack_delta_percentage_min, months * 20, buy_rule_no, roi_rule_no)
 
         stock.figure.plot(work_arr, days_range_in,
                           attack_delta_percentage_min, buy_rule_no, roi_rule_no)

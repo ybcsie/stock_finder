@@ -1,4 +1,4 @@
-from . import tools, msgopt
+from . import tools, msgopt, utils
 from .c_api import stock
 import os
 import json
@@ -35,6 +35,7 @@ def read_trade_day_list(smd_path, stock_data_cptr, months):
     # read
     smd_file = open(smd_path, 'r', encoding="UTF-8")
     content_dict = json.loads(smd_file.read())
+    smd_file.close()
 
     now = datetime.datetime.now()
     cur_month = now.month
@@ -62,8 +63,6 @@ def read_trade_day_list(smd_path, stock_data_cptr, months):
                                          tools.float_parser(trade_day[1]), tools.float_parser(trade_day[3]),
                                          tools.float_parser(trade_day[4]), tools.float_parser(trade_day[5]),
                                          tools.float_parser(trade_day[6]), tools.float_parser(trade_day[7]))
-
-    smd_file.close()
 
 
 def read_trade_data_in_list(trade_data_dir, stock_data_cptr_list, months):
@@ -123,3 +122,40 @@ def read_livedata(livedata, stock_data_cptr):
         delta = 0.0
 
     stock.add_trade_day_info(stock_data_cptr, date, vol, first, highest, lowest, last, delta)
+
+
+def read_dtd(dtd_path, stock_data_cptr_list):
+    if not os.path.exists(dtd_path):
+        raise RuntimeError("{} not exist".format(dtd_path))
+
+    dtd_file = open(dtd_path, 'r')
+    content_dict = json.loads(dtd_file.read())
+    dtd_file.close()
+
+    for key, value in content_dict.items():
+        if len(value) == 0:
+            continue
+
+        for stock_dtd in value:
+            try:
+                stock_id = int(stock_dtd[0])
+            except:
+                continue
+
+            idx = utils.get_idx_by_stock_id(stock_data_cptr_list, stock_id)
+            if idx == -1:
+                continue
+
+            stock.enable_day_trading(stock_data_cptr_list[idx], int(key))
+
+
+def read_all_dtd(dtd_dir, stock_data_cptr_list):
+    if not os.path.exists(dtd_dir):
+        raise RuntimeError("{} not exist".format(dtd_dir))
+
+    for dtd_filename in os.listdir(dtd_dir):
+        if not dtd_filename.endswith(".dtd"):
+            continue
+
+        print("read dtd {}".format(dtd_filename))
+        read_dtd("{}/{}".format(dtd_dir, dtd_filename), stock_data_cptr_list)

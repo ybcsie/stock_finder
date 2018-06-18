@@ -45,6 +45,7 @@ void add_trade_day_info_new_item(trade_day_info_arr *trade_day_info_arr_ptr, int
 	new_trade_day_info_ptr->lowest = lowest;
 	new_trade_day_info_ptr->last = last;
 	new_trade_day_info_ptr->delta = delta;
+	new_trade_day_info_ptr->day_trading = 0;
 
 	trade_day_info_arr_ptr->ptr_arr[*(trade_day_info_arr_ptr->cur_len_ptr) - 1] = new_trade_day_info_ptr;
 }

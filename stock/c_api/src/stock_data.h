@@ -14,6 +14,7 @@ typedef struct
 	float lowest;
 	float last;
 	float delta;
+	int day_trading;
 
 } trade_day_info;
 
