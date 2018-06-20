@@ -52,6 +52,7 @@ int find_idx_range_by_yyyymm(trade_day_info_arr *trade_day_info_arr_ptr, int yyy
 
 int days_range;
 int delta_percentage_min;
+int new_high_percentage_filter;
 float price_limit;
 
 int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);

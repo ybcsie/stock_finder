@@ -94,7 +94,7 @@ def plot_months(work_arr, days_range, attack_delta_percentage_min, months, buy_r
         x_avg = []
         y_avg = []
 
-        if percentage > 5:
+        if percentage > 4:
             break
         cur_month = now.month
         cur_year = now.year
@@ -107,12 +107,13 @@ def plot_months(work_arr, days_range, attack_delta_percentage_min, months, buy_r
             yyyymm = int("{}{:02d}".format(cur_year, cur_month))
             er = utils.cal_month_e(work_arr, days_range, attack_delta_percentage_min, yyyymm, percentage, buy_rule_no, roi_rule_no)
             if er == -99999:
+                print("no target : {}".format(yyyymm))
                 continue
 
             x.append(months - i)
             y.append(er)
 
-            if i % 2:
+            if i % 10:
                 x_str.append("")
             else:
                 x_str.append(yyyymm)
@@ -180,6 +181,7 @@ def plot_months_percentage(work_arr, days_range, attack_delta_percentage_min, mo
             percentage += 0.5
 
             if er == -99999:
+                print("no target : {}".format(yyyymm))
                 continue
 
             x.append(percentage)

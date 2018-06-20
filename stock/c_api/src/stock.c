@@ -91,6 +91,8 @@ const int WORK_TYPE_ATTACK = 1;
 
 PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 {
+	new_high_percentage_filter = 1;
+
 	PyObject *opt_PyList = PyList_New(0);
 
 	trade_day_info_arr *trade_day_info_arr_ptr;
@@ -131,7 +133,7 @@ float calc_days_e(stock_data_arr *work_arr_ptr, const int days, const float mppt
 	// printf("total: %d\n", total);
 	// printf("match: %d\n", match);
 	// printf("possibility: %f%c\n", (float)match / total * 100, '%');
-	printf("E of R: %f%c\n", er, '%');
+	// printf("E of R: %f%c\n", er, '%');
 	return er;
 }
 
@@ -166,7 +168,7 @@ float calc_day_e(stock_data_arr *work_arr_ptr, const int date, const float mppt,
 	else
 		assert(er != -99999);
 
-	printf("E of R: %f%c\n", er, '%');
+	// printf("E of R: %f%c\n", er, '%');
 	return er;
 }
 
@@ -204,6 +206,6 @@ float calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float m
 	else
 		assert(er != -99999);
 
-	printf("E of R: %f%c\n", er, '%');
+	// printf("E of R: %f%c\n", er, '%');
 	return er;
 }

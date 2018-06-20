@@ -7,6 +7,7 @@
 
 int days_range = 150;
 int delta_percentage_min = 5;
+int new_high_percentage_filter = 0;
 float price_limit = 150;
 
 trade_day_info_arr *new_trade_day_info_arr_ptr(const int size)
@@ -145,7 +146,15 @@ float get_open_delta_percentage(trade_day_info **trade_day_info_ptr_arr, int tra
 
 int is_limup(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 {
-	if (get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) > 9 && trade_day_info_ptr_arr[trade_day_info_idx]->last == trade_day_info_ptr_arr[trade_day_info_idx]->highest)
+	if (trade_day_info_ptr_arr[trade_day_info_idx]->last != trade_day_info_ptr_arr[trade_day_info_idx]->highest)
+		return 0; //false
+
+	float percentage = get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx);
+
+	if (percentage > 9)
+		return 1; //true
+
+	if (trade_day_info_ptr_arr[trade_day_info_idx]->date < 20150601 && percentage > 6)
 		return 1; //true
 
 	return 0; //false
@@ -167,8 +176,9 @@ int is_new_high(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 	if (!is_red_k(trade_day_info_ptr_arr[trade_day_info_idx]))
 		return 0; //false
 
-	if (get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) < delta_percentage_min)
-		return 0; //false
+	if (new_high_percentage_filter)
+		if (get_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) < delta_percentage_min)
+			return 0; //false
 
 	int earliest_date = get_date_by_delta(trade_day_info_ptr_arr[trade_day_info_idx]->date, days_range);
 
@@ -227,6 +237,10 @@ int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_id
 	if (trade_day_info_idx == 0)
 		return 0; //false
 
+	if (trade_day_info_ptr_arr[trade_day_info_idx]->date >= 20140106)
+		if (!trade_day_info_ptr_arr[trade_day_info_idx]->day_trading)
+			return 0; //false
+
 	// day-1 newh + limup -> day jump -> is (high-open)/open > percentage (high > open) ?
 	if (rule_no == 1)
 	{
@@ -234,12 +248,12 @@ int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_id
 			return 0; //false
 
 		if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) + mppt > 10)
-			// if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) > 9)
 			return 0; //false
 
 		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
 
+		new_high_percentage_filter = 0;
 		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
 
@@ -258,11 +272,12 @@ int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_id
 			return 0; //false
 
 		if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) + mppt > 10)
-			// if (get_open_delta_percentage(trade_day_info_ptr_arr, trade_day_info_idx) > 9)
 			return 0; //false
 
 		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
+
+		delta_percentage_min = 6;
 
 		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false

@@ -6,7 +6,7 @@ listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
 dtd_dir = "dtd"
 
-months = 48
+months = 96
 days_range = 120
 new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
@@ -194,21 +194,21 @@ if __name__ == '__main__':
         roi_rule_no = 2
         buy_rule_no = 2
 
-        stock.stock.set_price_limit(160)
+        stock.stock.set_price_limit(200)
 
-        stock.figure.plot_3months_percentage(
-            work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
+        # stock.figure.plot_3months_percentage(
+        #     work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
 
         stock.figure.plot_months(
             work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
-        stock.figure.plot_months_percentage(
-            work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
-
-        stock.figure.plot_days(
-            work_arr, days_range_in, attack_delta_percentage_min, months * 20, buy_rule_no, roi_rule_no)
-
-        stock.figure.plot(work_arr, days_range_in,
-                          attack_delta_percentage_min, buy_rule_no, roi_rule_no)
+        # stock.figure.plot_months_percentage(
+        #     work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
+        #
+        # stock.figure.plot_days(
+        #     work_arr, days_range_in, attack_delta_percentage_min, months * 20, buy_rule_no, roi_rule_no)
+        #
+        # stock.figure.plot(work_arr, days_range_in,
+        #                   attack_delta_percentage_min, buy_rule_no, roi_rule_no)
 
     else:
         worker(print)
