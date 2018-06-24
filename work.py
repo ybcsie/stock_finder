@@ -35,10 +35,10 @@ def worker(display_func):
 
         logger.logp("update_smd_in_list : start")
         force_update = False
-        stock.updater.update_smd_in_list(
-            listed_list, trade_data_dir, months, finish_flag, force_update)
-        while not finish_flag[0]:
-            stock.tools.delay(5)
+        # stock.updater.update_smd_in_list(
+        #     listed_list, trade_data_dir, months, finish_flag, force_update)
+        # while not finish_flag[0]:
+        #     stock.tools.delay(5)
         logger.logp("update_smd_in_list : done\n")
 
         finish_flag[0] = False
@@ -51,6 +51,8 @@ def worker(display_func):
         work_arr = stock.init_work_arr(listed_list)
         ready = True
 
+        stock.livedata.get_livedata(listed_list)
+        input("fu")
         while True:
             now = datetime.datetime.now()
 
@@ -186,7 +188,7 @@ def init(display_func):
 
 
 if __name__ == '__main__':
-    analysis_mode = True
+    analysis_mode = False
     if analysis_mode:
         init(print)
 

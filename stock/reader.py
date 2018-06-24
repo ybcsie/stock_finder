@@ -72,58 +72,6 @@ def read_trade_data_in_list(trade_data_dir, stock_data_cptr_list, months):
         read_trade_day_list("{}/{}.smd".format(trade_data_dir, stock_id), stock_data_cptr, months)
 
 
-def read_livedata(livedata, stock_data_cptr):
-    try:
-        date = int(livedata["d"])
-    except:
-        logger.logp("Error: livedata date -- {} {}".format(stock.get_stock_id(stock_data_cptr), livedata))
-        return
-
-    try:
-        vol = tools.float_parser(livedata["v"])
-    except KeyError:
-        vol = 0.0
-
-    try:
-        first = tools.float_parser(livedata["o"])
-    except KeyError:
-        try:
-            first = tools.float_parser(livedata["pz"])
-        except KeyError:
-            first = 0.0
-
-    try:
-        highest = tools.float_parser(livedata["h"])
-    except KeyError:
-        try:
-            highest = tools.float_parser(livedata["pz"])
-        except KeyError:
-            highest = 0.0
-
-    try:
-        lowest = tools.float_parser(livedata["l"])
-    except KeyError:
-        try:
-            lowest = tools.float_parser(livedata["pz"])
-        except KeyError:
-            lowest = 0.0
-
-    try:
-        last = tools.float_parser(livedata["z"])
-    except KeyError:
-        try:
-            last = tools.float_parser(livedata["pz"])
-        except KeyError:
-            last = 0.0
-
-    try:
-        delta = last - tools.float_parser(livedata["y"])
-    except KeyError:
-        delta = 0.0
-
-    stock.add_trade_day_info(stock_data_cptr, date, vol, first, highest, lowest, last, delta)
-
-
 def read_dtd(dtd_path, stock_data_cptr_list):
     if not os.path.exists(dtd_path):
         raise RuntimeError("{} not exist".format(dtd_path))
