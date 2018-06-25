@@ -42,8 +42,8 @@ def require_update(update_log_path):
     now = datetime.datetime.now()
 
     update_datetime = datetime.datetime.strptime(
-        "{}/{}/{}/15".format(now.year, now.month, now.day), "%Y/%m/%d/%H")
-    if now.hour < 15:
+        "{}/{}/{}/17".format(now.year, now.month, now.day), "%Y/%m/%d/%H")
+    if now.hour < 17:
         update_datetime -= datetime.timedelta(days=1)
 
     if last_datetime >= update_datetime:
@@ -62,7 +62,8 @@ def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
             smd_path = "{}/{}.smd".format(smd_dir, stock_id)
 
             logger.logp("update {}".format(stock_id))
-            url = "http://140.116.39.233/stockserver/data/smd/{}.smd".format(stock_id)
+            url = "http://140.116.39.233/stockserver/data/smd/{}.smd".format(
+                stock_id)
             if download_file(url, smd_path) != 0:
                 error += 1
 

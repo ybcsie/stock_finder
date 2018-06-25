@@ -49,7 +49,7 @@ def worker(display_func):
         while True:
             now = datetime.datetime.now()
 
-            if now.hour == 15 and not updated:
+            if now.hour == 17 and not updated:
                 break
 
             if not updated:
