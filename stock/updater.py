@@ -2,91 +2,34 @@ from . import crawler, msgopt, tools
 from .c_api import stock
 import json
 import datetime
-import threading
+import urllib.request
 import os
 
 
 logger = msgopt.Logger("updater")
 
 
+def download_file(url, path):
+    max_try = 3
+    while True:
+        logger.logp("Trying connection...")
+        try:
+            urllib.request.urlretrieve(url, path)
+            logger.logp("OK")
+            return 0
+
+        except:
+            logger.logp("Error: urllib")
+            tools.wait_retry(logger, 5)
+            if max_try == 0:
+                return -1
+
+            max_try -= 1
+            continue
+
+
 def update_listed_list(listed_path):
-    content = crawler.get_listed_list()
-    if content is None:
-        logger.logp("cannot get listed list")
-        return -1
-
-    sid_file = open(listed_path, 'w', encoding="UTF-8")
-    sid_file.write(content)
-    sid_file.close()
-    return 0
-
-
-def get_exist_smd_dict(smd_path):
-    opt = {}
-    if not os.path.exists(smd_path):
-        return opt
-
-    try:
-        smd_file = open(smd_path, 'r')
-
-        for key, content in json.loads(smd_file.read()).items():
-            if len(content) == 0 or tools.check_smd_content_by_key(content[0], key):
-                opt[key] = content
-
-        smd_file.close()
-
-        return opt
-
-    except:
-        return opt
-
-
-def is_content_need_update(content):
-    if content is None:
-        return True
-
-    if len(content) == 0:
-        return False
-
-    now = datetime.datetime.now()
-    if tools.check_smd_content_by_key(content[0], int(now.strftime("%Y%m"))):
-        if int(now.strftime("%Y%m%d")) > tools.tw_date2int(content[len(content) - 1][0]):
-            return True
-
-    return False
-
-
-def update_smd(smd_path, stock_id, months):
-    exist_dict = get_exist_smd_dict(smd_path)
-
-    now = datetime.datetime.now()
-    cur_month = now.month
-    cur_year = now.year
-    for i in range(months):
-        if cur_month == 0:
-            cur_month = 12
-            cur_year -= 1
-
-        key = "{}{:02d}".format(cur_year, cur_month)
-        content = exist_dict.get(key)
-
-        if is_content_need_update(content):
-            content = crawler.get_month_data(cur_year, cur_month, stock_id)
-
-            if content is None:
-                logger.logp("cannot get data: {} {} {}".format(
-                    cur_year, cur_month, stock_id))
-            else:
-                exist_dict[key] = content
-
-        cur_month -= 1
-
-    smd_tmp_path = "{}.tmp".format(smd_path)
-    smd_tmp_file = open(smd_tmp_path, 'w', encoding="UTF-8")
-    smd_tmp_file.write(json.dumps(exist_dict))
-    smd_tmp_file.close()
-
-    os.replace(smd_tmp_path, smd_path)
+    return download_file("http://140.116.39.233/stockserver/data/listed.sid", listed_path)
 
 
 def require_update(update_log_path):
@@ -109,27 +52,24 @@ def require_update(update_log_path):
     return True
 
 
-def t_update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, force_update):
+def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
     update_log_path = smd_dir + "/update.log"
 
+    error = 0
     if require_update(update_log_path) or force_update:
         for stock_data_cptr in stock_data_cptr_list:
             stock_id = stock.get_stock_id(stock_data_cptr)
             smd_path = "{}/{}.smd".format(smd_dir, stock_id)
 
             logger.logp("update {}".format(stock_id))
-            update_smd(smd_path, stock_id, months)
+            url = "http://140.116.39.233/stockserver/data/smd/{}.smd".format(stock_id)
+            if download_file(url, smd_path) != 0:
+                error += 1
 
-    update_log_file = open(update_log_path, 'w')
-    update_log_file.write(datetime.datetime.now().strftime("%Y/%m/%d/%H"))
-    update_log_file.close()
-
-    finish_flag[0] = True
-
-
-def update_smd_in_list(stock_data_cptr_list, smd_dir, months, finish_flag, force_update=False):
-    threading.Thread(target=t_update_smd_in_list, args=(
-        stock_data_cptr_list, smd_dir, months, finish_flag, force_update)).start()
+    if error == 0:
+        update_log_file = open(update_log_path, 'w')
+        update_log_file.write(datetime.datetime.now().strftime("%Y/%m/%d/%H"))
+        update_log_file.close()
 
 
 def get_exist_dtd_dict(dtd_path):

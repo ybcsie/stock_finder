@@ -47,15 +47,3 @@ def get_livedata(stock_data_cptr_list):
                                      value[5], value[6])
         return
 
-
-def load_livedata(livedata_list, stock_data_cptr_list):
-    for livedata in livedata_list:
-        livedata_stock_id = int(livedata["c"])
-        idx = utils.get_idx_by_stock_id(stock_data_cptr_list, livedata_stock_id)
-        if idx < 0:
-            logger.logp("stock id {} not in list".format(livedata_stock_id))
-            continue
-
-        reader.read_livedata(livedata, stock_data_cptr_list[idx])
-
-

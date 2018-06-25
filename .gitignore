@@ -2,9 +2,12 @@
 *.tmp
 *.js
 *.log
+*.sid
 
 *__pycache__
 
+smd
+dtd
 .idea
 results
 imgopt
