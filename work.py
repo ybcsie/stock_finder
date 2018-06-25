@@ -27,6 +27,8 @@ def worker(display_func):
         stock.updater.update_listed_list(listed_sid_path)
         logger.logp("update_listed_list : done\n")
 
+        stock.updater.update_dtd(dtd_dir, months)
+
         logger.logp("read_stock_data_cptr_list : start")
         listed_list = stock.reader.read_stock_data_cptr_list(
             listed_sid_path, months * 30)
@@ -42,6 +44,8 @@ def worker(display_func):
         stock.reader.read_trade_data_in_list(
             trade_data_dir, listed_list, months)
         logger.logp("read_trade_data_in_list : done\n")
+
+        stock.reader.read_all_dtd(dtd_dir, listed_list)
 
         work_arr = stock.init_work_arr(listed_list)
         ready = True
@@ -146,64 +150,5 @@ def get_js(var_name, delta_percentage_min):
     return "var {} = ".format(var_name) + "[{}];".format(op_js)
 
 
-def init(display_func):
-    global work_arr
-
-    logger = stock.Logger("work", display_func)
-    finish_flag = [False]
-
-    logger.logp("update_listed_list : start")
-    stock.updater.update_listed_list(listed_sid_path)
-    logger.logp("update_listed_list : done\n")
-
-    stock.updater.update_dtd(dtd_dir, months)
-
-    logger.logp("read_stock_data_cptr_list : start")
-    listed_list = stock.reader.read_stock_data_cptr_list(
-        listed_sid_path, months * 30)
-    logger.logp("read_stock_data_cptr_list : done\n")
-
-    logger.logp("update_smd_in_list : start")
-    # stock.updater.update_smd_in_list(listed_list, trade_data_dir, months, finish_flag)
-    # while not finish_flag[0]:
-    #     stock.tools.delay(5)
-    logger.logp("update_smd_in_list : done\n")
-
-    finish_flag[0] = False
-
-    logger.logp("read_trade_data_in_list : start")
-    stock.reader.read_trade_data_in_list(trade_data_dir, listed_list, months)
-    logger.logp("read_trade_data_in_list : done\n")
-
-    stock.reader.read_all_dtd(dtd_dir, listed_list)
-
-    work_arr = stock.init_work_arr(listed_list)
-
-
 if __name__ == '__main__':
-    analysis_mode = False
-    if analysis_mode:
-        init(print)
-
-        days_range_in = 120
-        roi_rule_no = 2
-        buy_rule_no = 2
-
-        stock.stock.set_price_limit(200)
-
-        # stock.figure.plot_3months_percentage(
-        #     work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
-
-        stock.figure.plot_months(
-            work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
-        # stock.figure.plot_months_percentage(
-        #     work_arr, days_range_in, attack_delta_percentage_min, months, buy_rule_no, roi_rule_no)
-        #
-        # stock.figure.plot_days(
-        #     work_arr, days_range_in, attack_delta_percentage_min, months * 20, buy_rule_no, roi_rule_no)
-        #
-        # stock.figure.plot(work_arr, days_range_in,
-        #                   attack_delta_percentage_min, buy_rule_no, roi_rule_no)
-
-    else:
         worker(print)

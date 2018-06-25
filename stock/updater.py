@@ -1,6 +1,5 @@
-from . import crawler, msgopt, tools
+from . import msgopt, tools
 from .c_api import stock
-import json
 import datetime
 import urllib.request
 import os
@@ -53,6 +52,9 @@ def require_update(update_log_path):
 
 
 def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
+    if not os.path.exists(smd_dir):
+        os.mkdir(smd_dir)
+
     update_log_path = smd_dir + "/update.log"
 
     error = 0
@@ -73,59 +75,10 @@ def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
         update_log_file.close()
 
 
-def get_exist_dtd_dict(dtd_path):
-    if not os.path.exists(dtd_path):
-        return {}
-
-    try:
-        dtd_file = open(dtd_path, 'r')
-
-        opt = json.loads(dtd_file.read())
-
-        dtd_file.close()
-
-        return opt
-
-    except:
-        return {}
-
-
-def update_month_dtd(dtd_path, yyyymm):
-    if yyyymm < 201401:
-        return
-
-    now = datetime.datetime.now()
-    cur_datetime = datetime.datetime.strptime("{}01".format(yyyymm), "%Y%m%d")
-    one_day_delta = datetime.timedelta(days=1)
-
-    exist_dict = get_exist_dtd_dict(dtd_path)
-    while True:
-        if cur_datetime > now or int(cur_datetime.strftime("%Y%m")) > yyyymm:
-            break
-
-        if cur_datetime >= datetime.datetime.strptime("20140106", "%Y%m%d"):
-            key = "{}".format(cur_datetime.strftime("%Y%m%d"))
-            content = exist_dict.get(key)
-
-            if content is None:
-                content = crawler.get_day_trading_data(key)
-
-                if content is None:
-                    logger.logp("cannot get data: {}".format(key))
-                else:
-                    exist_dict[key] = content
-
-        cur_datetime += one_day_delta
-
-    dtd_tmp_path = "{}.tmp".format(dtd_path)
-    dtd_tmp_file = open(dtd_tmp_path, 'w', encoding="UTF-8")
-    dtd_tmp_file.write(json.dumps(exist_dict))
-    dtd_tmp_file.close()
-
-    os.replace(dtd_tmp_path, dtd_path)
-
-
 def update_dtd(dtd_dir, months):
+    if not os.path.exists(dtd_dir):
+        os.mkdir(dtd_dir)
+
     now = datetime.datetime.now()
     cur_month = now.month
     cur_year = now.year
@@ -135,6 +88,15 @@ def update_dtd(dtd_dir, months):
             cur_year -= 1
 
         yyyymm = cur_year * 100 + cur_month
-        update_month_dtd("{}/{}.dtd".format(dtd_dir, yyyymm), yyyymm)
+
+        if yyyymm < 201401:
+            break
+
+        dtd_path = "{}/{}.dtd".format(dtd_dir, yyyymm)
+
+        if yyyymm < now.month * 100 + now.day and os.path.exists(dtd_path):
+            continue
+
+        download_file("http://140.116.39.233/stockserver/data/dtd/{}.dtd".format(yyyymm), dtd_path)
 
         cur_month -= 1

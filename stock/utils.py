@@ -1,5 +1,4 @@
 from .c_api import stock
-import datetime
 
 
 def get_new_high(work_arr_cptr, days_range, delta_percentage_min):
