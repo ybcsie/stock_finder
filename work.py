@@ -7,7 +7,7 @@ trade_data_dir = "smd"
 dtd_dir = "dtd"
 
 days_range = 120
-months = days_range / 20
+months = int(days_range / 20)
 new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
 
@@ -47,7 +47,7 @@ def worker(display_func):
 
         now = datetime.datetime.now()
         stock.reader.read_dtd(
-            "{}/{}{}.dtd".format(dtd_dir, now.year, now.month), listed_list)
+            "{}/{}.dtd".format(dtd_dir, now.year * 100 + now.month), listed_list)
 
         work_arr = stock.init_work_arr(listed_list)
         ready = True
