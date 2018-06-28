@@ -46,8 +46,8 @@ def worker(display_func):
         logger.logp("read_trade_data_in_list : done\n")
 
         now = datetime.datetime.now()
-            stock.reader.read_dtd(
-                "{}/{}{}.dtd".format(dtd_dir, now.year, now.month), listed_list)
+        stock.reader.read_dtd(
+            "{}/{}{}.dtd".format(dtd_dir, now.year, now.month), listed_list)
 
         work_arr = stock.init_work_arr(listed_list)
         ready = True
