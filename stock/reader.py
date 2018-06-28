@@ -93,15 +93,3 @@ def read_dtd(dtd_path, stock_data_cptr_list):
                 continue
 
             stock.enable_day_trading(stock_data_cptr_list[idx], int(key))
-
-
-def read_all_dtd(dtd_dir, stock_data_cptr_list):
-    if not os.path.exists(dtd_dir):
-        raise RuntimeError("{} not exist".format(dtd_dir))
-
-    for dtd_filename in os.listdir(dtd_dir):
-        if not dtd_filename.endswith(".dtd"):
-            continue
-
-        print("read dtd {}".format(dtd_filename))
-        read_dtd("{}/{}".format(dtd_dir, dtd_filename), stock_data_cptr_list)
