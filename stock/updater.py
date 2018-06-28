@@ -75,28 +75,13 @@ def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
         update_log_file.close()
 
 
-def update_dtd(dtd_dir, months):
+def update_dtd(dtd_dir):
     if not os.path.exists(dtd_dir):
         os.mkdir(dtd_dir)
 
     now = datetime.datetime.now()
-    cur_month = now.month
-    cur_year = now.year
-    for i in range(months):
-        if cur_month == 0:
-            cur_month = 12
-            cur_year -= 1
+    yyyymm = now.year * 100 + now.month
 
-        yyyymm = cur_year * 100 + cur_month
+    dtd_path = "{}/{}.dtd".format(dtd_dir, yyyymm)
 
-        if yyyymm < 201401:
-            break
-
-        dtd_path = "{}/{}.dtd".format(dtd_dir, yyyymm)
-
-        if yyyymm < now.month * 100 + now.day and os.path.exists(dtd_path):
-            continue
-
-        download_file("http://140.116.39.233/stockserver/data/dtd/{}.dtd".format(yyyymm), dtd_path)
-
-        cur_month -= 1
+    return download_file("http://140.116.39.233/stockserver/data/dtd/{}.dtd".format(yyyymm), dtd_path)

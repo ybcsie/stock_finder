@@ -29,7 +29,8 @@ class Logger:
             self.log_file.close()
 
         Logger.log_date = int(datetime.datetime.now().strftime("%Y%m%d"))
-        log_path = "{}/{}_{}.log".format(Logger.log_dir, Logger.log_date, self.log_name)
+        log_path = "{}/{}_{}.log".format(Logger.log_dir,
+                                         Logger.log_date, self.log_name)
 
         if not os.path.exists(Logger.log_dir):
             os.makedirs(Logger.log_dir)
@@ -47,5 +48,3 @@ class Logger:
     def logp(self, text):
         self.display(text)
         self.log(text)
-
-

@@ -46,4 +46,3 @@ def get_livedata(stock_data_cptr_list):
             stock.add_trade_day_info(stock_data_cptr_list[idx], value[0], value[1], value[2], value[3], value[4],
                                      value[5], value[6])
         return
-

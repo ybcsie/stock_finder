@@ -6,8 +6,8 @@ listed_sid_path = "listed.sid"
 trade_data_dir = "smd"
 dtd_dir = "dtd"
 
-months = 96
 days_range = 120
+months = days_range / 20
 new_high_delta_percentage_min = 6
 attack_delta_percentage_min = 9
 
@@ -27,7 +27,7 @@ def worker(display_func):
         stock.updater.update_listed_list(listed_sid_path)
         logger.logp("update_listed_list : done\n")
 
-        stock.updater.update_dtd(dtd_dir, months)
+        stock.updater.update_dtd(dtd_dir)
 
         logger.logp("read_stock_data_cptr_list : start")
         listed_list = stock.reader.read_stock_data_cptr_list(
@@ -151,4 +151,4 @@ def get_js(var_name, delta_percentage_min):
 
 
 if __name__ == '__main__':
-        worker(print)
+    worker(print)

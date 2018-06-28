@@ -19,9 +19,8 @@ def read_stock_data_cptr_list(sid_path, trade_day_size):
     for i in range(len(stock_data_cptr_list)):
         stock_info = stock_data_cptr_list[i].split(',')
         if len(stock_info) == 2:
-            stock_data_cptr_list[i] = stock.new_stock_data_ptr(int(stock_info[0]),
-                                                               tools.date2int(stock_info[1]),
-                                                               trade_day_size)
+            stock_data_cptr_list[i] = stock.new_stock_data_ptr(
+                int(stock_info[0]), tools.date2int(stock_info[1]), trade_day_size)
         else:
             print("Error: stock list -- {}".format(stock_data_cptr_list[i]))
 
@@ -59,17 +58,16 @@ def read_trade_day_list(smd_path, stock_data_cptr, months):
     for key in reversed(key_list):
         for trade_day in content_dict[key]:
             if not (trade_day[3] == trade_day[4] == trade_day[5] == trade_day[6] == "--"):
-                stock.add_trade_day_info(stock_data_cptr, tools.tw_date2int(trade_day[0]),
-                                         tools.float_parser(trade_day[1]), tools.float_parser(trade_day[3]),
-                                         tools.float_parser(trade_day[4]), tools.float_parser(trade_day[5]),
-                                         tools.float_parser(trade_day[6]), tools.float_parser(trade_day[7]))
+                stock.add_trade_day_info(stock_data_cptr, tools.tw_date2int(trade_day[0]), tools.float_parser(trade_day[1]), tools.float_parser(
+                    trade_day[3]), tools.float_parser(trade_day[4]), tools.float_parser(trade_day[5]), tools.float_parser(trade_day[6]), tools.float_parser(trade_day[7]))
 
 
 def read_trade_data_in_list(trade_data_dir, stock_data_cptr_list, months):
     for stock_data_cptr in stock_data_cptr_list:
         stock_id = stock.get_stock_id(stock_data_cptr)
         print("read trade data {}".format(stock_id))
-        read_trade_day_list("{}/{}.smd".format(trade_data_dir, stock_id), stock_data_cptr, months)
+        read_trade_day_list("{}/{}.smd".format(trade_data_dir,
+                                               stock_id), stock_data_cptr, months)
 
 
 def read_dtd(dtd_path, stock_data_cptr_list):
