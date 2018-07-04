@@ -4,14 +4,7 @@ from .c_api import stock
 def get_new_high(work_arr_cptr, days_range, delta_percentage_min):
     stock.set_days_range(days_range)
     stock.set_delta_percentage_min(delta_percentage_min)
-    idx_list = stock.work(work_arr_cptr, stock.WORK_TYPE_NEWHIGH)
-    opt_list = []
-    for i in idx_list:
-        info = []
-        stock_data_ptr = stock.get_stock_data_ptr(work_arr_cptr, i)
-        info.append(stock.get_stock_id(stock_data_ptr))
-        info.append(stock.get_last_day_trading(stock_data_ptr))
-        opt_list.append(info)
+    opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_NEWHIGH)
 
     return opt_list
 
@@ -19,14 +12,7 @@ def get_new_high(work_arr_cptr, days_range, delta_percentage_min):
 def get_attack(work_arr_cptr, days_range, delta_percentage_min):
     stock.set_days_range(days_range)
     stock.set_delta_percentage_min(delta_percentage_min)
-    idx_list = stock.work(work_arr_cptr, stock.WORK_TYPE_ATTACK)
-    opt_list = []
-    for i in idx_list:
-        info = []
-        stock_data_ptr = stock.get_stock_data_ptr(work_arr_cptr, i)
-        info.append(stock.get_stock_id(stock_data_ptr))
-        info.append(stock.get_last_day_trading(stock_data_ptr))
-        opt_list.append(info)
+    opt_list = stock.work(work_arr_cptr, stock.WORK_TYPE_ATTACK)
 
     return opt_list
 

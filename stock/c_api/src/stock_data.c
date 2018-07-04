@@ -422,3 +422,82 @@ float get_RoI(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, f
 	}
 	assert(0);
 }
+
+float price_normalize(float price, int round) //round = 0:round-up 1:round-down
+{
+	if (price < 0.01)
+		return -1;
+
+	float out_price;
+	if (price < 10)
+	{
+		out_price = (int)(price * 100) / 100.0;
+		if (round == 0 && price > out_price)
+			out_price += 0.01;
+
+		return out_price;
+	}
+
+	if (price < 50)
+	{
+		int tmp = price * 100;
+		while (tmp % 5)
+			tmp++;
+
+		out_price = tmp / 100.0;
+		if (round == 0 && price > out_price)
+			out_price += 0.05;
+
+		if (round == 1 && price < out_price)
+			out_price -= 0.05;
+
+		return out_price;
+	}
+
+	if (price < 100)
+	{
+		out_price = (int)(price * 10) / 10.0;
+		if (round == 0 && price > out_price)
+			out_price += 0.1;
+
+		return out_price;
+	}
+
+	if (price < 500)
+	{
+		int tmp = price * 10;
+		while (tmp % 5)
+			tmp++;
+
+		out_price = tmp / 10.0;
+		if (round == 0 && price > out_price)
+			out_price += 0.5;
+
+		if (round == 1 && price < out_price)
+			out_price -= 0.5;
+
+		return out_price;
+	}
+
+	if (price < 1000)
+	{
+		out_price = (int)price;
+		if (round == 0 && price > out_price)
+			out_price += 1;
+
+		return out_price;
+	}
+
+	int tmp = price;
+	while (tmp % 5)
+		tmp++;
+
+	out_price = tmp;
+	if (round == 0 && price > out_price)
+		out_price += 5;
+
+	if (round == 1 && price < out_price)
+		out_price -= 5;
+
+	return out_price;
+}

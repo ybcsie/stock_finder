@@ -73,4 +73,8 @@ int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx);
 int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float mppt, int rule_no);
 float get_RoI(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, float mppt, int rule_no);
 
+#define ROUND_UP 0
+#define ROUND_DOWN 0
+float price_normalize(float price, int round); //round = 0:round-up 1:round-down
+
 #endif

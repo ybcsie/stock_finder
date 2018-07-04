@@ -40,7 +40,6 @@ stock_data *new_stock_data_ptr(const int stock_id, const int ipo_date, const int
 }
 
 int get_stock_id(stock_data *stock_data_ptr) { return stock_data_ptr->stock_id; }
-int get_last_day_trading(stock_data *stock_data_ptr) { return stock_data_ptr->trade_day_info_arr_ptr->ptr_arr[*(stock_data_ptr->trade_day_info_arr_ptr->cur_len_ptr) - 1]->day_trading; }
 stock_data *get_stock_data_ptr(stock_data_arr *work_arr_ptr, int stock_idx) { return work_arr_ptr->ptr_arr[stock_idx]; }
 
 void add_stock_data(stock_data_arr *work_arr_ptr, stock_data *stock_data_ptr)
@@ -119,13 +118,24 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 	new_high_percentage_filter = 1;
 
 	PyObject *opt_PyList = PyList_New(0);
+	PyObject *info_PyList;
 
-	trade_day_info_arr *trade_day_info_arr_ptr;
+	trade_day_info_arr *trade_day_info_arr_ptr; //[id, day trading, percentage, stop_profit_price, y_high]
+	int last_i;
 	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
 	{
 		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
-		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, *(trade_day_info_arr_ptr->cur_len_ptr) - 1))
-			PyList_Append(opt_PyList, PyLong_FromLong(i));
+		last_i = *(trade_day_info_arr_ptr->cur_len_ptr) - 1;
+		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, last_i))
+		{
+			info_PyList = PyList_New(0);
+			PyList_Append(info_PyList, PyLong_FromLong(work_arr_ptr->ptr_arr[i]->stock_id));
+			PyList_Append(info_PyList, PyLong_FromLong(trade_day_info_arr_ptr->ptr_arr[last_i]->day_trading));
+			PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i]->delta / trade_day_info_arr_ptr->ptr_arr[last_i - 1]->last * 100));
+			PyList_Append(info_PyList, PyFloat_FromDouble(price_normalize(trade_day_info_arr_ptr->ptr_arr[last_i]->first * 1.025, ROUND_DOWN)));
+			PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i - 1]->highest));
+			PyList_Append(opt_PyList, info_PyList);
+		}
 	}
 
 	return opt_PyList;
@@ -286,4 +296,8 @@ PyObject *get_k_info(stock_data_arr *work_arr_ptr, int stock_idx, int trade_day_
 
 	// PyList_Append(opt_PyList, PyList
 	return opt_PyList;
+}
+
+void test()
+{
 }

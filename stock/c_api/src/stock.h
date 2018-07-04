@@ -10,7 +10,6 @@ void del_stock_data_arr(stock_data_arr *stock_data_arr_ptr);
 stock_data *new_stock_data_ptr(const int stock_id, const int ipo_date, const int trade_day_info_size);
 
 int get_stock_id(stock_data *stock_data_ptr);
-int get_last_day_trading(stock_data *stock_data_ptr);
 stock_data *get_stock_data_ptr(stock_data_arr *work_arr_ptr, int stock_idx);
 
 void add_stock_data(stock_data_arr *work_arr_ptr, stock_data *stock_data_ptr);
@@ -30,5 +29,7 @@ float calc_days_e(stock_data_arr *work_arr_ptr, const int days, const float mppt
 float calc_day_e(stock_data_arr *work_arr_ptr, const int date, const float mppt, const int buy_rule_no, const int RoI_rule_no);
 PyObject *calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float mppt, const int buy_rule_no, const int RoI_rule_no);
 PyObject *get_k_info(stock_data_arr *work_arr_ptr, int stock_idx, int trade_day_info_idx);
+
+void test();
 
 #endif

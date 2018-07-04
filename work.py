@@ -75,12 +75,15 @@ def worker(display_func):
                         op_js += ','
 
                     stock_id = stock_info[0]
+                    print(stock_id)
                     if stock_info[1]:
                         day_trading = "(Y)"
                     else:
                         day_trading = "(N)"
-                    print(stock_id)
-                    op_js += "[\"{}\", \"{}\"]".format(stock_id, day_trading)
+                    percentage = "{:.2f}".format(stock_info[2])
+                    stop_profit_price = "{:.2f}".format(stock_info[3])
+                    y_high = "{:.2f}".format(stock_info[4])
+                    op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage, stop_profit_price, y_high)
 
             op_file.write("var attack = [{}];".format(op_js))
             op_file.flush()
@@ -95,12 +98,15 @@ def worker(display_func):
                         op_js += ','
 
                     stock_id = stock_info[0]
+                    print(stock_id)
                     if stock_info[1]:
                         day_trading = "(Y)"
                     else:
                         day_trading = "(N)"
-                    print(stock_id)
-                    op_js += "[\"{}\", \"{}\"]".format(stock_id, day_trading)
+                    percentage = "{:.2f}".format(stock_info[2])
+                    stop_profit_price = "{:.2f}".format(stock_info[3])
+                    y_high = "{:.2f}".format(stock_info[4])
+                    op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage, stop_profit_price, y_high)
 
             op_file.write("\nvar newhigh = [{}];".format(op_js))
             op_file.flush()
@@ -115,12 +121,15 @@ def worker(display_func):
                         op_js += ','
 
                     stock_id = stock_info[0]
+                    print(stock_id)
                     if stock_info[1]:
                         day_trading = "(Y)"
                     else:
                         day_trading = "(N)"
-                    print(stock_id)
-                    op_js += "[\"{}\", \"{}\"]".format(stock_id, day_trading)
+                    percentage = "{:.2f}%".format(stock_info[2])
+                    stop_profit_price = "{:.2f}".format(stock_info[3])
+                    y_high = "{:.2f}".format(stock_info[4])
+                    op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage, stop_profit_price, y_high)
 
             op_file.write("\nvar newhigh_max = [{}];".format(op_js))
             op_file.close()

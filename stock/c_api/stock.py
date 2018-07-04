@@ -112,10 +112,6 @@ def get_stock_id(stock_data_ptr):
     return _stock.get_stock_id(stock_data_ptr)
 get_stock_id = _stock.get_stock_id
 
-def get_last_day_trading(stock_data_ptr):
-    return _stock.get_last_day_trading(stock_data_ptr)
-get_last_day_trading = _stock.get_last_day_trading
-
 def get_stock_data_ptr(work_arr_ptr, stock_idx):
     return _stock.get_stock_data_ptr(work_arr_ptr, stock_idx)
 get_stock_data_ptr = _stock.get_stock_data_ptr
@@ -167,6 +163,10 @@ calc_month_e = _stock.calc_month_e
 def get_k_info(work_arr_ptr, stock_idx, trade_day_info_idx):
     return _stock.get_k_info(work_arr_ptr, stock_idx, trade_day_info_idx)
 get_k_info = _stock.get_k_info
+
+def test():
+    return _stock.test()
+test = _stock.test
 # This file is compatible with both classic and new-style classes.
 
 cvar = _stock.cvar
