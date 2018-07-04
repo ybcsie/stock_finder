@@ -1,4 +1,5 @@
 #include "stock.h"
+#include "tools.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -39,6 +40,8 @@ stock_data *new_stock_data_ptr(const int stock_id, const int ipo_date, const int
 }
 
 int get_stock_id(stock_data *stock_data_ptr) { return stock_data_ptr->stock_id; }
+int get_last_day_trading(stock_data *stock_data_ptr) { return stock_data_ptr->trade_day_info_arr_ptr->ptr_arr[*(stock_data_ptr->trade_day_info_arr_ptr->cur_len_ptr) - 1]->day_trading; }
+stock_data *get_stock_data_ptr(stock_data_arr *work_arr_ptr, int stock_idx) { return work_arr_ptr->ptr_arr[stock_idx]; }
 
 void add_stock_data(stock_data_arr *work_arr_ptr, stock_data *stock_data_ptr)
 {
@@ -72,6 +75,28 @@ void add_trade_day_info(stock_data *stock_data_ptr, int date, float vol, float f
 	add_trade_day_info_new_item(arr_ptr, date, vol, first, highest, lowest, last, delta);
 }
 
+void set_time_price(stock_data *stock_data_ptr, int date, PyObject *price_list)
+{
+	trade_day_info_arr *arr_ptr = stock_data_ptr->trade_day_info_arr_ptr;
+	int idx = find_idx_by_date(arr_ptr, date);
+	if (idx == -1)
+		return;
+
+	int len = PyList_Size(price_list);
+	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->size = len;
+	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->highest_arr = malloc(len * sizeof(float));
+	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->lowest_arr = malloc(len * sizeof(float));
+	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->cur_len_ptr = malloc(len * sizeof(int));
+	*(arr_ptr->ptr_arr[idx]->time_price_arr_ptr->cur_len_ptr) = 0;
+
+	for (int i = 0; i < len; i++)
+	{
+		arr_ptr->ptr_arr[idx]->time_price_arr_ptr->highest_arr[i] = PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(price_list, i), 0));
+		arr_ptr->ptr_arr[idx]->time_price_arr_ptr->lowest_arr[i] = PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(price_list, i), 1));
+		*(arr_ptr->ptr_arr[idx]->time_price_arr_ptr->cur_len_ptr) += 1;
+	}
+}
+
 void enable_day_trading(stock_data *stock_data_ptr, int date)
 {
 	int idx = find_idx_by_date(stock_data_ptr->trade_day_info_arr_ptr, date);
@@ -100,7 +125,7 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 	{
 		trade_day_info_arr_ptr = work_arr_ptr->ptr_arr[i]->trade_day_info_arr_ptr;
 		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, *(trade_day_info_arr_ptr->cur_len_ptr) - 1))
-			PyList_Append(opt_PyList, PyLong_FromLong(work_arr_ptr->ptr_arr[i]->stock_id));
+			PyList_Append(opt_PyList, PyLong_FromLong(i));
 	}
 
 	return opt_PyList;
@@ -172,8 +197,14 @@ float calc_day_e(stock_data_arr *work_arr_ptr, const int date, const float mppt,
 	return er;
 }
 
-float calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float mppt, const int buy_rule_no, const int RoI_rule_no)
+PyObject *calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float mppt, const int buy_rule_no, const int RoI_rule_no)
 {
+	int total = 0;
+	int match = 0;
+
+	PyObject *opt_PyList = PyList_New(0);
+	PyObject *not_match_PyList = PyList_New(0);
+
 	trade_day_info_arr *trade_day_info_arr_ptr;
 
 	int no_target = 1;
@@ -197,7 +228,22 @@ float calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float m
 			if (!is_buy_target(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, buy_rule_no))
 				continue; //not target
 
-			er += get_RoI(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, RoI_rule_no);
+			total += 1;
+			float roi = get_RoI(trade_day_info_arr_ptr->ptr_arr, trade_day_info_idx, mppt, RoI_rule_no);
+			if (roi < 0)
+			{
+				// printf("%d %d\n", trade_day_info_arr_ptr->ptr_arr[trade_day_info_idx]->date, work_arr_ptr->ptr_arr[i]->stock_id);
+
+				PyObject *not_match_detail_PyList = PyList_New(0);
+				PyList_Append(not_match_detail_PyList, PyLong_FromLong(i));
+				PyList_Append(not_match_detail_PyList, PyLong_FromLong(trade_day_info_idx));
+
+				PyList_Append(not_match_PyList, not_match_detail_PyList);
+			}
+			else
+				match += 1;
+
+			er += roi;
 		}
 	}
 
@@ -207,5 +253,37 @@ float calc_month_e(stock_data_arr *work_arr_ptr, const int yyyymm, const float m
 		assert(er != -99999);
 
 	// printf("E of R: %f%c\n", er, '%');
-	return er;
+	if (mppt < 3)
+		printf("p: %d %f = %f%c\n", yyyymm, mppt, (float)match / total * 100, '%');
+
+	PyList_Append(opt_PyList, PyFloat_FromDouble(er));
+	PyList_Append(opt_PyList, not_match_PyList);
+	return opt_PyList;
+}
+
+PyObject *get_k_info(stock_data_arr *work_arr_ptr, int stock_idx, int trade_day_info_idx)
+{
+	trade_day_info **trade_day_info_ptr_arr = work_arr_ptr->ptr_arr[stock_idx]->trade_day_info_arr_ptr->ptr_arr;
+	PyObject *opt_PyList = PyList_New(0);
+
+	int earliest_date = get_date_by_delta(trade_day_info_ptr_arr[trade_day_info_idx]->date, days_range);
+
+	for (int cur_trade_day_info_idx = trade_day_info_idx; trade_day_info_ptr_arr[cur_trade_day_info_idx]->date >= earliest_date; cur_trade_day_info_idx--)
+	{
+		if (cur_trade_day_info_idx == 0)
+			break;
+
+		PyObject *trade_day_PyList = PyList_New(0);
+		PyList_Append(trade_day_PyList, PyLong_FromLong(trade_day_info_ptr_arr[cur_trade_day_info_idx]->date));
+		PyList_Append(trade_day_PyList, PyFloat_FromDouble(trade_day_info_ptr_arr[cur_trade_day_info_idx]->vol));
+		PyList_Append(trade_day_PyList, PyFloat_FromDouble(trade_day_info_ptr_arr[cur_trade_day_info_idx]->first));
+		PyList_Append(trade_day_PyList, PyFloat_FromDouble(trade_day_info_ptr_arr[cur_trade_day_info_idx]->highest));
+		PyList_Append(trade_day_PyList, PyFloat_FromDouble(trade_day_info_ptr_arr[cur_trade_day_info_idx]->lowest));
+		PyList_Append(trade_day_PyList, PyFloat_FromDouble(trade_day_info_ptr_arr[cur_trade_day_info_idx]->last));
+
+		PyList_Append(opt_PyList, trade_day_PyList);
+	}
+
+	// PyList_Append(opt_PyList, PyList
+	return opt_PyList;
 }

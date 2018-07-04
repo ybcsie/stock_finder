@@ -25,7 +25,13 @@ trade_day_info_arr *new_trade_day_info_arr_ptr(const int size)
 void del_trade_day_info_arr(trade_day_info_arr *trade_day_info_arr_ptr)
 {
 	for (int i = 0; i < *(trade_day_info_arr_ptr->cur_len_ptr) - 1; i++)
+	{
+		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->cur_len_ptr);
+		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->highest_arr);
+		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->lowest_arr);
+		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr);
 		free(trade_day_info_arr_ptr->ptr_arr[i]);
+	}
 
 	free(trade_day_info_arr_ptr->ptr_arr);
 	free(trade_day_info_arr_ptr->cur_len_ptr);
@@ -47,6 +53,7 @@ void add_trade_day_info_new_item(trade_day_info_arr *trade_day_info_arr_ptr, int
 	new_trade_day_info_ptr->last = last;
 	new_trade_day_info_ptr->delta = delta;
 	new_trade_day_info_ptr->day_trading = 0;
+	new_trade_day_info_ptr->time_price_arr_ptr = malloc(sizeof(time_price_arr));
 
 	trade_day_info_arr_ptr->ptr_arr[*(trade_day_info_arr_ptr->cur_len_ptr) - 1] = new_trade_day_info_ptr;
 }
@@ -253,7 +260,6 @@ int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_id
 		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
 
-		new_high_percentage_filter = 0;
 		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
 
@@ -277,14 +283,33 @@ int is_buy_target(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_id
 		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
 
-		delta_percentage_min = 6;
-
 		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
 			return 0; //false
 
 		return 1; //true
 	}
 
+	if (rule_no == 4)
+	{
+		if (trade_day_info_ptr_arr[trade_day_info_idx]->first > price_limit)
+			return 0; //false
+
+		if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
+			return 0; //false
+
+		if (!is_limup(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+			return 0; //false
+
+		if (!is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
+			return 0; //false
+
+		float yhigh = trade_day_info_ptr_arr[trade_day_info_idx - 1]->highest;
+		float lowest = trade_day_info_ptr_arr[trade_day_info_idx]->lowest;
+		if (lowest > yhigh)
+			return 0; //false
+
+		return 1; //true
+	}
 	assert(0);
 }
 
@@ -295,6 +320,7 @@ float get_RoI(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, f
 	float open = trade_day_info_ptr_arr[trade_day_info_idx]->first;
 	float close = trade_day_info_ptr_arr[trade_day_info_idx]->last;
 	float yhigh = trade_day_info_ptr_arr[trade_day_info_idx - 1]->highest;
+	time_price_arr *time_price_arr_ptr = trade_day_info_ptr_arr[trade_day_info_idx]->time_price_arr_ptr;
 
 	// buy at open -> highest RoI > mppt -> RoI = mppt   else -> sell at close
 	if (rule_no == 1)
@@ -307,16 +333,92 @@ float get_RoI(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx, f
 
 	if (rule_no == 2)
 	{
-		if ((highest - open) / open * 100 < mppt)
+		if (yhigh < lowest) //must not stop lose
 		{
-			if (lowest < yhigh)
-				return (yhigh - open) / open * 100;
+			if ((highest - open) / open * 100 < mppt)
+				return (close - open) / open * 100;
 
-			return (close - open) / open * 100;
+			return mppt;
+		}
+		else
+		{
+			//check lowest first or highest first
+			for (int i = 0; i < *(time_price_arr_ptr->cur_len_ptr); i++)
+			{
+				if (yhigh < time_price_arr_ptr->lowest_arr[i])
+					if ((time_price_arr_ptr->highest_arr[i] - open) / open * 100 < mppt)
+					{
+						// printf("%f %f\n", time_price_arr_ptr->highest_arr[i], time_price_arr_ptr->lowest_arr[i]);
+						continue;
+					}
+					else
+						return mppt;
+				else
+					return (yhigh - open) / open * 100;
+			}
 		}
 
-		return mppt;
+		assert(0); //shoud not go here
 	}
 
+	if (rule_no == 3)
+	{
+		if (yhigh < lowest) //must not stop lose
+		{
+			if ((highest - open) / open * 100 < mppt)
+				return (close - open) / open * 100;
+
+			return mppt;
+		}
+		else
+		{
+			//check lowest first or highest first
+			int short_mode = 0;
+			float roi = 0;
+			for (int i = 0; i < *(time_price_arr_ptr->cur_len_ptr); i++)
+			{
+				if (short_mode)
+				{
+					if ((yhigh - time_price_arr_ptr->lowest_arr[i]) / time_price_arr_ptr->lowest_arr[i] * 100 < 1.5)
+						continue;
+					else
+						return roi + 1.5;
+				}
+
+				if (yhigh < time_price_arr_ptr->lowest_arr[i])
+					if ((time_price_arr_ptr->highest_arr[i] - open) / open * 100 < mppt)
+						continue;
+					else
+						return mppt;
+				else
+				{
+					roi = (yhigh - open) / open * 100;
+					short_mode = 1;
+				}
+			}
+			return roi + (yhigh - close) / close * 100;
+		}
+
+		assert(0); //shoud not go here
+	}
+
+	if (rule_no == 4)
+	{
+		if ((yhigh - lowest) / lowest * 100 < mppt)
+			return (yhigh - close) / close * 100;
+		else
+			return mppt;
+	}
+
+	if (rule_no == 5)
+	{
+		if ((highest - yhigh) / yhigh * 100 > 9)
+			return (yhigh - highest) / highest * 100;
+
+		if ((yhigh - lowest) / lowest * 100 < mppt)
+			return (yhigh - close) / close * 100;
+		else
+			return mppt;
+	}
 	assert(0);
 }

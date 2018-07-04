@@ -70,12 +70,17 @@ def worker(display_func):
                 work_arr, days_range, attack_delta_percentage_min)
             if len(attack_list) > 0:
                 print("\nattack:")
-                for stock_id in attack_list:
+                for stock_info in attack_list:
                     if op_js != "":
                         op_js += ','
 
+                    stock_id = stock_info[0]
+                    if stock_info[1]:
+                        day_trading = "(Y)"
+                    else:
+                        day_trading = "(N)"
                     print(stock_id)
-                    op_js += "\"{}\"".format(stock_id)
+                    op_js += "\"{} {}\"".format(stock_id, day_trading)
 
             op_file.write("var attack = [{}];".format(op_js))
             op_file.flush()
@@ -85,12 +90,17 @@ def worker(display_func):
                 work_arr, days_range, new_high_delta_percentage_min)
             if len(newhigh_list) > 0:
                 print("\nnew high:")
-                for stock_id in newhigh_list:
+                for stock_info in newhigh_list:
                     if op_js != "":
                         op_js += ','
 
+                    stock_id = stock_info[0]
+                    if stock_info[1]:
+                        day_trading = "(Y)"
+                    else:
+                        day_trading = "(N)"
                     print(stock_id)
-                    op_js += "\"{}\"".format(stock_id)
+                    op_js += "\"{} {}\"".format(stock_id, day_trading)
 
             op_file.write("\nvar newhigh = [{}];".format(op_js))
             op_file.flush()
@@ -100,12 +110,17 @@ def worker(display_func):
                 work_arr, days_range, attack_delta_percentage_min)
             if len(newhigh_max_list) > 0:
                 print("\nnew high max:")
-                for stock_id in newhigh_max_list:
+                for stock_info in newhigh_max_list:
                     if op_js != "":
                         op_js += ','
 
+                    stock_id = stock_info[0]
+                    if stock_info[1]:
+                        day_trading = "(Y)"
+                    else:
+                        day_trading = "(N)"
                     print(stock_id)
-                    op_js += "\"{}\"".format(stock_id)
+                    op_js += "\"{} {}\"".format(stock_id, day_trading)
 
             op_file.write("\nvar newhigh_max = [{}];".format(op_js))
             op_file.close()

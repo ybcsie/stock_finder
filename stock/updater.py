@@ -53,7 +53,7 @@ def require_update(update_log_path):
 
 def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
     if not os.path.exists(smd_dir):
-        os.mkdir(smd_dir)
+        os.makedirs(smd_dir)
 
     update_log_path = smd_dir + "/update.log"
 
@@ -77,7 +77,7 @@ def update_smd_in_list(stock_data_cptr_list, smd_dir, force_update=False):
 
 def update_dtd(dtd_dir):
     if not os.path.exists(dtd_dir):
-        os.mkdir(dtd_dir)
+        os.makedirs(dtd_dir)
 
     now = datetime.datetime.now()
     yyyymm = now.year * 100 + now.month

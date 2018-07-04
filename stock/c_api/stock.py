@@ -112,6 +112,14 @@ def get_stock_id(stock_data_ptr):
     return _stock.get_stock_id(stock_data_ptr)
 get_stock_id = _stock.get_stock_id
 
+def get_last_day_trading(stock_data_ptr):
+    return _stock.get_last_day_trading(stock_data_ptr)
+get_last_day_trading = _stock.get_last_day_trading
+
+def get_stock_data_ptr(work_arr_ptr, stock_idx):
+    return _stock.get_stock_data_ptr(work_arr_ptr, stock_idx)
+get_stock_data_ptr = _stock.get_stock_data_ptr
+
 def add_stock_data(work_arr_ptr, stock_data_ptr):
     return _stock.add_stock_data(work_arr_ptr, stock_data_ptr)
 add_stock_data = _stock.add_stock_data
@@ -119,6 +127,10 @@ add_stock_data = _stock.add_stock_data
 def add_trade_day_info(stock_data_ptr, date, vol, first, highest, lowest, last, delta):
     return _stock.add_trade_day_info(stock_data_ptr, date, vol, first, highest, lowest, last, delta)
 add_trade_day_info = _stock.add_trade_day_info
+
+def set_time_price(stock_data_ptr, date, price_list):
+    return _stock.set_time_price(stock_data_ptr, date, price_list)
+set_time_price = _stock.set_time_price
 
 def enable_day_trading(stock_data_ptr, date):
     return _stock.enable_day_trading(stock_data_ptr, date)
@@ -151,6 +163,10 @@ calc_day_e = _stock.calc_day_e
 def calc_month_e(work_arr_ptr, yyyymm, mppt, buy_rule_no, RoI_rule_no):
     return _stock.calc_month_e(work_arr_ptr, yyyymm, mppt, buy_rule_no, RoI_rule_no)
 calc_month_e = _stock.calc_month_e
+
+def get_k_info(work_arr_ptr, stock_idx, trade_day_info_idx):
+    return _stock.get_k_info(work_arr_ptr, stock_idx, trade_day_info_idx)
+get_k_info = _stock.get_k_info
 # This file is compatible with both classic and new-style classes.
 
 cvar = _stock.cvar

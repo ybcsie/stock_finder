@@ -7,6 +7,15 @@
 
 typedef struct
 {
+	float *highest_arr;
+	float *lowest_arr;
+	int *cur_len_ptr;
+	int size;
+
+} time_price_arr;
+
+typedef struct
+{
 	int date; //20180101
 	float vol;
 	float first;
@@ -15,6 +24,7 @@ typedef struct
 	float last;
 	float delta;
 	int day_trading;
+	time_price_arr *time_price_arr_ptr;
 
 } trade_day_info;
 
