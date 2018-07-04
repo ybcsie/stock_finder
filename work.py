@@ -80,7 +80,7 @@ def worker(display_func):
                     else:
                         day_trading = "(N)"
                     print(stock_id)
-                    op_js += "\"{} {}\"".format(stock_id, day_trading)
+                    op_js += "[\"{}\", \"{}\"]".format(stock_id, day_trading)
 
             op_file.write("var attack = [{}];".format(op_js))
             op_file.flush()
@@ -100,7 +100,7 @@ def worker(display_func):
                     else:
                         day_trading = "(N)"
                     print(stock_id)
-                    op_js += "\"{} {}\"".format(stock_id, day_trading)
+                    op_js += "[\"{}\", \"{}\"]".format(stock_id, day_trading)
 
             op_file.write("\nvar newhigh = [{}];".format(op_js))
             op_file.flush()
@@ -120,7 +120,7 @@ def worker(display_func):
                     else:
                         day_trading = "(N)"
                     print(stock_id)
-                    op_js += "\"{} {}\"".format(stock_id, day_trading)
+                    op_js += "[\"{}\", \"{}\"]".format(stock_id, day_trading)
 
             op_file.write("\nvar newhigh_max = [{}];".format(op_js))
             op_file.close()
