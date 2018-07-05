@@ -45,6 +45,8 @@ def worker(display_func):
             trade_data_dir, listed_list, months)
         logger.logp("read_trade_data_in_list : done\n")
 
+        stock.livedata.get_livedata(listed_list)
+
         now = datetime.datetime.now()
         stock.reader.read_dtd(
             "{}/{}.dtd".format(dtd_dir, now.year * 100 + now.month), listed_list)
