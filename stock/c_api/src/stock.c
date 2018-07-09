@@ -121,7 +121,7 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 	PyObject *opt_PyList = PyList_New(0);
 	PyObject *info_PyList;
 
-	trade_day_info_arr *trade_day_info_arr_ptr; //[id, day trading, percentage, stop_profit_price, y_high]
+	trade_day_info_arr *trade_day_info_arr_ptr;
 	int last_i;
 	for (int i = 0; i < *(work_arr_ptr->cur_len_ptr); i++)
 	{
@@ -130,11 +130,22 @@ PyObject *work(stock_data_arr *work_arr_ptr, const int work_type)
 		if (work_funcs[work_type](trade_day_info_arr_ptr->ptr_arr, last_i))
 		{
 			info_PyList = PyList_New(0);
-			PyList_Append(info_PyList, PyLong_FromLong(work_arr_ptr->ptr_arr[i]->stock_id));
-			PyList_Append(info_PyList, PyLong_FromLong(trade_day_info_arr_ptr->ptr_arr[last_i]->day_trading));
-			PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i]->delta / trade_day_info_arr_ptr->ptr_arr[last_i - 1]->last * 100));
-			PyList_Append(info_PyList, PyFloat_FromDouble(price_normalize(trade_day_info_arr_ptr->ptr_arr[last_i]->first * 1.025, ROUND_DOWN)));
-			PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i - 1]->highest));
+			PyList_Append(info_PyList, PyLong_FromLong(work_arr_ptr->ptr_arr[i]->stock_id));																		  //[0] : id
+			PyList_Append(info_PyList, PyLong_FromLong(trade_day_info_arr_ptr->ptr_arr[last_i]->day_trading));														  //[1] : day trading
+			PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i]->delta / trade_day_info_arr_ptr->ptr_arr[last_i - 1]->last * 100)); //[2] : %
+			PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i]->first));															  //[3] : open
+
+			if (work_type == WORK_TYPE_ATTACK)
+			{
+				PyList_Append(info_PyList, PyFloat_FromDouble(price_normalize(trade_day_info_arr_ptr->ptr_arr[last_i]->first * 1.025, ROUND_DOWN))); //[4] : stop profit price
+				PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i - 1]->highest));								 //[5] : yhigh
+				PyList_Append(info_PyList, PyFloat_FromDouble(trade_day_info_arr_ptr->ptr_arr[last_i - 1]->highest / 1.015));						 //[6] : stop profit price (short)
+				if (trade_day_info_arr_ptr->ptr_arr[last_i]->lowest <= trade_day_info_arr_ptr->ptr_arr[last_i - 1]->highest)						 //[7] : is gap filled?
+					PyList_Append(info_PyList, PyLong_FromLong(1));																					 //gap filled == True
+				else
+					PyList_Append(info_PyList, PyLong_FromLong(0));
+			}
+
 			PyList_Append(opt_PyList, info_PyList);
 		}
 	}

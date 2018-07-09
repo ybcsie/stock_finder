@@ -73,19 +73,48 @@ def worker(display_func):
             if len(attack_list) > 0:
                 print("\nattack:")
                 for stock_info in attack_list:
-                    if op_js != "":
-                        op_js += ','
+                    if not stock_info[7]:
+                        if op_js != "":
+                            op_js += ','
 
-                    stock_id = stock_info[0]
-                    print(stock_id)
-                    if stock_info[1]:
-                        day_trading = "(Y)"
-                    else:
-                        day_trading = "(N)"
-                    percentage = "{:.2f}".format(stock_info[2])
-                    stop_profit_price = "{:.2f}".format(stock_info[3])
-                    y_high = "{:.2f}".format(stock_info[4])
-                    op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage, stop_profit_price, y_high)
+                        stock_id = stock_info[0]
+                        print(stock_id)
+                        if stock_info[1]:
+                            day_trading = "Y"
+                        else:
+                            day_trading = "N"
+                        percentage = "{:.2f}".format(stock_info[2])
+                        open_price = "{:.2f}".format(stock_info[3])
+                        stop_profit_price = "{:.2f}".format(stock_info[4])
+                        y_high = "{:.2f}".format(stock_info[5])
+                        op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading,
+                                                                                           percentage, open_price,
+                                                                                           stop_profit_price, y_high)
+
+            op_file.write("var attack = [{}];".format(op_js))
+            op_file.flush()
+
+            op_js = ""
+            if len(attack_list) > 0:
+                print("\nattack_filled):")
+                for stock_info in attack_list:
+                    if stock_info[7]:
+                        if op_js != "":
+                            op_js += ','
+
+                        stock_id = stock_info[0]
+                        print(stock_id)
+                        if stock_info[1]:
+                            day_trading = "Y"
+                        else:
+                            day_trading = "N"
+                        percentage = "{:.2f}".format(stock_info[2])
+                        open_price = "{:.2f}".format(stock_info[3])
+                        stop_profit_price = "{:.2f}".format(stock_info[6])
+                        stop_loss_price = "?"
+                        op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading,
+                                                                                           percentage, open_price,
+                                                                                           stop_profit_price, stop_loss_price)
 
             op_file.write("var attack = [{}];".format(op_js))
             op_file.flush()
@@ -106,9 +135,7 @@ def worker(display_func):
                     else:
                         day_trading = "(N)"
                     percentage = "{:.2f}".format(stock_info[2])
-                    stop_profit_price = "{:.2f}".format(stock_info[3])
-                    y_high = "{:.2f}".format(stock_info[4])
-                    op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage, stop_profit_price, y_high)
+                    op_js += "[\"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage)
 
             op_file.write("\nvar newhigh = [{}];".format(op_js))
             op_file.flush()
@@ -129,9 +156,7 @@ def worker(display_func):
                     else:
                         day_trading = "(N)"
                     percentage = "{:.2f}%".format(stock_info[2])
-                    stop_profit_price = "{:.2f}".format(stock_info[3])
-                    y_high = "{:.2f}".format(stock_info[4])
-                    op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage, stop_profit_price, y_high)
+                    op_js += "[\"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage)
 
             op_file.write("\nvar newhigh_max = [{}];".format(op_js))
             op_file.close()

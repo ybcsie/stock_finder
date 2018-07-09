@@ -232,7 +232,7 @@ int is_attack(trade_day_info **trade_day_info_ptr_arr, int trade_day_info_idx)
 	if (trade_day_info_idx == 0)
 		return 0; //false
 
-	if (!has_gap(trade_day_info_ptr_arr, trade_day_info_idx))
+	if (!is_jump(trade_day_info_ptr_arr, trade_day_info_idx))
 		return 0; //false
 
 	if (is_new_high(trade_day_info_ptr_arr, trade_day_info_idx - 1))
