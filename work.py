@@ -114,9 +114,10 @@ def worker(display_func):
                         stop_loss_price = "?"
                         op_js += "[\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading,
                                                                                            percentage, open_price,
-                                                                                           stop_profit_price, stop_loss_price)
+                                                                                           stop_profit_price,
+                                                                                           stop_loss_price)
 
-            op_file.write("var attack = [{}];".format(op_js))
+            op_file.write("var attack_filled = [{}];".format(op_js))
             op_file.flush()
 
             op_js = ""
@@ -131,9 +132,9 @@ def worker(display_func):
                     stock_id = stock_info[0]
                     print(stock_id)
                     if stock_info[1]:
-                        day_trading = "(Y)"
+                        day_trading = "Y"
                     else:
-                        day_trading = "(N)"
+                        day_trading = "N"
                     percentage = "{:.2f}".format(stock_info[2])
                     op_js += "[\"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage)
 
@@ -152,9 +153,9 @@ def worker(display_func):
                     stock_id = stock_info[0]
                     print(stock_id)
                     if stock_info[1]:
-                        day_trading = "(Y)"
+                        day_trading = "Y"
                     else:
-                        day_trading = "(N)"
+                        day_trading = "N"
                     percentage = "{:.2f}%".format(stock_info[2])
                     op_js += "[\"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage)
 
