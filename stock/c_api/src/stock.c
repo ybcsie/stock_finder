@@ -82,6 +82,7 @@ void set_time_price(stock_data *stock_data_ptr, int date, PyObject *price_list)
 		return;
 
 	int len = PyList_Size(price_list);
+	arr_ptr->ptr_arr[idx]->time_price_arr_ptr = malloc(sizeof(time_price_arr));
 	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->size = len;
 	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->highest_arr = malloc(len * sizeof(float));
 	arr_ptr->ptr_arr[idx]->time_price_arr_ptr->lowest_arr = malloc(len * sizeof(float));

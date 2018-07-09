@@ -26,10 +26,13 @@ void del_trade_day_info_arr(trade_day_info_arr *trade_day_info_arr_ptr)
 {
 	for (int i = 0; i < *(trade_day_info_arr_ptr->cur_len_ptr) - 1; i++)
 	{
-		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->cur_len_ptr);
-		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->highest_arr);
-		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->lowest_arr);
-		free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr);
+		if (trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr != NULL)
+		{
+			free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->cur_len_ptr);
+			free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->highest_arr);
+			free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr->lowest_arr);
+			free(trade_day_info_arr_ptr->ptr_arr[i]->time_price_arr_ptr);
+		}
 		free(trade_day_info_arr_ptr->ptr_arr[i]);
 	}
 
@@ -53,7 +56,7 @@ void add_trade_day_info_new_item(trade_day_info_arr *trade_day_info_arr_ptr, int
 	new_trade_day_info_ptr->last = last;
 	new_trade_day_info_ptr->delta = delta;
 	new_trade_day_info_ptr->day_trading = 0;
-	new_trade_day_info_ptr->time_price_arr_ptr = malloc(sizeof(time_price_arr));
+	new_trade_day_info_ptr->time_price_arr_ptr = NULL;
 
 	trade_day_info_arr_ptr->ptr_arr[*(trade_day_info_arr_ptr->cur_len_ptr) - 1] = new_trade_day_info_ptr;
 }
