@@ -29,7 +29,8 @@ def read_stock_data_cptr_list(sid_path, trade_day_size):
 
 def read_trade_day_list(smd_path, stock_data_cptr, months):
     if not os.path.exists(smd_path):
-        raise RuntimeError("{} not exist".format(smd_path))
+        print("{} not exist".format(smd_path))
+        return
 
     # read
     smd_file = open(smd_path, 'r', encoding="UTF-8")
