@@ -30,7 +30,7 @@ def read_stock_data_cptr_list(sid_path, trade_day_size):
 def read_trade_day_list(smd_path, stock_data_cptr, months):
     if not os.path.exists(smd_path):
         print("{} not exist".format(smd_path))
-        return -1
+        return
 
     # read
     smd_file = open(smd_path, 'r', encoding="UTF-8")
@@ -69,8 +69,7 @@ def read_trade_data_in_list(trade_data_dir, stock_data_cptr_list, months):
     for stock_data_cptr in stock_data_cptr_list:
         stock_id = stock.get_stock_id(stock_data_cptr)
         print("read trade data {}".format(stock_id))
-        if read_trade_day_list("{}/{}.smd".format(trade_data_dir, stock_id), stock_data_cptr, months) != 0:
-            stock_data_cptr_list.remove(stock_data_cptr)
+        read_trade_day_list("{}/{}.smd".format(trade_data_dir, stock_id), stock_data_cptr, months)
 
 
 def read_dtd(dtd_path, stock_data_cptr_list):
