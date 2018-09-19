@@ -1,4 +1,4 @@
-# last modify: 2018.09.19 15:55
+# last modify: 2018.09.19 16:11
 
 import datetime
 import os
@@ -38,15 +38,25 @@ class Logger:
 
         self.log_file = open(log_path, 'a')
 
-    def log(self, text):
+    def log(self, text, tag=""):
         if datetime.datetime.now().day != self.log_date.day:
             self.set_log_file()
 
+        Logger.add_tag(text, tag)
         content = "[{}]\n{}".format(datetime.datetime.now(), text)
         self.log_file.write(content + '\n')
         self.log_file.flush()
 
-    def logp(self, text):
+    def logp(self, text, tag=""):
+        Logger.add_tag(text, tag)
         self.display(text)
         self.log(text)
+
+    @staticmethod
+    def add_tag(text, tag):
+        if tag != "":
+            text = "[{}] {}".format(tag, text)
+
+        return text
+
 
