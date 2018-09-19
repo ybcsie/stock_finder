@@ -22,6 +22,8 @@ def worker(display_func):
     logger = stock.Logger("work", display_func)
     while True:
         updated = True
+        dtd_updated = True
+        live_dtd_added = False
 
         logger.logp("update_listed_list : start")
         stock.updater.update_listed_list(listed_sid_path)
@@ -60,8 +62,19 @@ def worker(display_func):
             if now.hour == 17 and not updated:
                 break
 
+            if now.hour == 2 and not dtd_updated:
+                break
+
+            if now.hour == 1:
+                if dtd_updated:
+                    dtd_updated = False
+
             if not updated:
                 stock.livedata.get_livedata(listed_list)
+
+                if now.hour == 8 and now.minute == 35 and not live_dtd_added:
+                    stock.reader.read_dtd("{}/{}.dtd".format(dtd_dir, now.year * 100 + now.month), listed_list)
+                    live_dtd_added = True
 
             logger.logp("worker : start")
 
@@ -136,7 +149,8 @@ def worker(display_func):
                     else:
                         day_trading = "N"
                     percentage = "{:.2f}".format(stock_info[2])
-                    op_js += "[\"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage)
+                    op_js += "[\"{}\", \"{}\", \"{}\"]".format(
+                        stock_id, day_trading, percentage)
 
             op_file.write("\nvar newhigh = [{}];".format(op_js))
             op_file.flush()
@@ -157,7 +171,8 @@ def worker(display_func):
                     else:
                         day_trading = "N"
                     percentage = "{:.2f}%".format(stock_info[2])
-                    op_js += "[\"{}\", \"{}\", \"{}\"]".format(stock_id, day_trading, percentage)
+                    op_js += "[\"{}\", \"{}\", \"{}\"]".format(
+                        stock_id, day_trading, percentage)
 
             op_file.write("\nvar newhigh_max = [{}];".format(op_js))
             op_file.close()
