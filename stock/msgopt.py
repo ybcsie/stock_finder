@@ -1,42 +1,45 @@
+# last modify: 2018.09.19 15:55
+
 import datetime
 import os
 
 
 class Logger:
-    log_dir = "logs"
+    LOG_DIR = "logs"
+    DT_FORMAT = "%Y%m%d"
 
     def del_old_log_files(self):
-        log_filename_list = []
-        for log_filename in os.listdir(Logger.log_dir):
-            if log_filename.endswith(".log"):
-                log_filename_list.append(log_filename)
+        for log_filename in os.listdir(Logger.LOG_DIR):
+            if not log_filename.endswith(".log"):
+                continue
 
-        for log_filename in log_filename_list:
-            this_date = int(log_filename.split('_')[0])
-            if self.log_date - this_date > 15:
-                os.remove("{}/{}".format(Logger.log_dir, log_filename))
+            this_date = log_filename.split('_')[0]
+            this_date = datetime.datetime.strptime(this_date, Logger.DT_FORMAT)
+            if (self.log_date - this_date).days > 15:
+                os.remove("{}/{}".format(Logger.LOG_DIR, log_filename))
 
     def __init__(self, log_name, display_func=print):
         self.log_name = log_name
         self.display = display_func
         self.log_file = None
-        self.log_date = 0
+        self.log_date = None
         self.set_log_file()
 
     def set_log_file(self):
         if self.log_file is not None:
             self.log_file.close()
 
-        self.log_date = int(datetime.datetime.now().strftime("%Y%m%d"))
-        log_path = "{}/{}_{}.log".format(Logger.log_dir, self.log_date, self.log_name)
+        now = datetime.datetime.now()
+        self.log_date = datetime.datetime.strptime("{}{}{}".format(now.year, now.month, now.day), Logger.DT_FORMAT)
+        log_path = "{}/{}_{}.log".format(Logger.LOG_DIR, self.log_date.strftime(Logger.DT_FORMAT), self.log_name)
 
-        if not os.path.exists(Logger.log_dir):
-            os.makedirs(Logger.log_dir)
+        if not os.path.exists(Logger.LOG_DIR):
+            os.makedirs(Logger.LOG_DIR)
 
         self.log_file = open(log_path, 'a')
 
     def log(self, text):
-        if int(datetime.datetime.now().strftime("%Y%m%d")) > self.log_date:
+        if datetime.datetime.now().day != self.log_date.day:
             self.set_log_file()
 
         content = "[{}]\n{}".format(datetime.datetime.now(), text)
@@ -46,5 +49,4 @@ class Logger:
     def logp(self, text):
         self.display(text)
         self.log(text)
-
 
